@@ -19,11 +19,11 @@ export default function App() {
 
           <main className="flex-1 overflow-y-auto">
             <Routes>
-              <Route index element={<Dashboard setIsOpen={setIsOpen}/>} />
-              <Route path="/dashboard" element={<Dashboard setIsOpen={setIsOpen}/>} />
-              <Route path="/current" element={<Current setIsOpen={setIsOpen}/>} />
-              <Route path="/future" element={<Future setIsOpen={setIsOpen}/>} />
-              <Route path="/testing" element={<Testing setIsOpen={setIsOpen}/>} />
+              <Route index element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/current" element={<Current />} />
+              <Route path="/future" element={<Future />} />
+              <Route path="/testing" element={<Testing />} />
             </Routes>
           </main>
         </div>
