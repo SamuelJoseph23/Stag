@@ -1,4 +1,3 @@
-import TopBar from "../components/TopBar";
 import Saved from "./CurrentTabs/Saved";
 import Invested from "./CurrentTabs/Invested";
 import {useState} from 'react';
@@ -9,11 +8,8 @@ import HorizontalBarChart from "../components/HorizontalBarChart";
 import { useAccounts } from '../context/AccountsContext';
 
 
-type TestingProps = {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
 
-export default function Current({setIsOpen}: TestingProps ) {
+export default function Current() {
     const {getCatTotal, getFilteredAccount} = useAccounts();
     const tabs = [...ACCOUNT_CATEGORIES];
     const [activeTab, setActiveTab] =  useState(tabs[0]);
