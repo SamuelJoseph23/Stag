@@ -1,7 +1,7 @@
-import { useAccounts } from "../../context/AccountsContext";
-import AccountList from "../../components/AccountList";
-import AddAccount from "../../components/AddAccount";
-import {ACCOUNT_CATEGORIES} from '../../types';
+import { useAccounts } from "../../../context/AccountsContext";
+import AccountList from "../../../components/AccountList";
+import AddAccount from "../../../components/AddAccount";
+import {ACCOUNT_CATEGORIES} from '../../../types';
 
 export default function Saved() {
   const { accounts } = useAccounts();

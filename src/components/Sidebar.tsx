@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-
+import SidebarCollapseLink from './SidebarCollapseLink'; // Make sure the path is correct
 type SidebarProps = {
   isOpen: boolean;
 };
@@ -12,6 +12,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 	}`;
 
 	const active = `${isOpen ? "w-0 opacity-0" : "w-auto opacity-100"} bg-gray-600 font-semibold text-green-300`;
+	
+	const currentSubLinks = [
+        { path: "/current/accounts", label: "Accounts" },
+        { path: "/current/income", label: "Income" },
+        { path: "/current/expense", label: "Expense" },
+    ];
+
+	const currentIcon = (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 -960 960 960">
+			<path d="M200-280v-280h80v280zm240 0v-280h80v280zM80-120v-80h800v80zm600-160v-280h80v280zM80-640v-80l400-200 400 200v80zm178-80h444zm0 0h444L480-830z" />
+		</svg>
+    );
 
 	return (
 		<div className={`h-full text-white bg-gray-900 transition-all duration-300 flex flex-col ${isOpen ? "w-0" : "w-36"}`}>
@@ -27,16 +39,14 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 					</span>
 				</Link>
 
-				<Link className={`${link} ${pathname === "/current" && active} ${isOpen ? "pointer-events-none" : ""}`} to="/current">
-					<span className={`flex items-center gap-2 overflow-hidden whitespace-nowrap transition-all duration-300 ${isOpen ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 -960 960 960">
-							<path d="M200-280v-280h80v280zm240 0v-280h80v280zM80-120v-80h800v80zm600-160v-280h80v280zM80-640v-80l400-200 400 200v80zm178-80h444zm0 0h444L480-830z" />
-						</svg>
-						<span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${isOpen ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
-							Current
-						</span>
-					</span>
-				</Link>
+				<SidebarCollapseLink
+                    label="Current"
+                    icon={currentIcon}
+                    subLinks={currentSubLinks}
+                    isOpen={isOpen}
+                    linkBaseClass={link}
+                    activeClass={active}
+                />
 
 				<Link className={`${link} ${pathname === "/future" && active} ${isOpen ? "pointer-events-none" : ""}`} to="/future">
 					<span className={`flex items-center gap-2 overflow-hidden whitespace-nowrap transition-all duration-300 ${isOpen ? "w-0 opacity-0" : "w-auto opacity-100"}`}>

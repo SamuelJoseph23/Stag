@@ -1,15 +1,15 @@
-import Saved from "./CurrentTabs/Saved";
-import Invested from "./CurrentTabs/Invested";
+import Saved from "./AccountsTab/Saved";
+import Invested from "./AccountsTab/Invested";
 import {useState} from 'react';
-import {ACCOUNT_CATEGORIES} from '../types';
-import Property from "./CurrentTabs/Property";
-import Debt from "./CurrentTabs/Debt";
-import HorizontalBarChart from "../components/HorizontalBarChart";
-import { useAccounts } from '../context/AccountsContext';
+import {ACCOUNT_CATEGORIES} from '../../types';
+import Property from "./AccountsTab/Property";
+import Debt from "./AccountsTab/Debt";
+import HorizontalBarChart from "../../components/HorizontalBarChart";
+import { useAccounts } from '../../context/AccountsContext';
 
 
 
-export default function Current() {
+export default function AccountsTab() {
     const {getCatTotal, getFilteredAccount} = useAccounts();
     const tabs = [...ACCOUNT_CATEGORIES];
     const [activeTab, setActiveTab] =  useState(tabs[0]);
