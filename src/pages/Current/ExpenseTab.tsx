@@ -1,14 +1,12 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { ExpenseContext } from '../../components/Expense/ExpenseContext';
 import { 
   DefaultExpense,
   SecondaryExpense,
   BaseExpense,
-  EXPENSE_CATEGORIES
 } from '../../components/Expense/models';
 import ExpenseCard from '../../components/Expense/ExpenseCard';
 import ExpenseHorizontalBarChart from '../../components/Expense/ExpenseHorizontalBarChart';
-import AddExpenseControl from '../../components/Expense/AddExpenseUI';
 import AddExpenseModal from '../../components/Expense/AddExpenseModal';
 
 const ExpenseList = ({ type }: { type: any }) => {

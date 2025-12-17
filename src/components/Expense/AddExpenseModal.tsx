@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { ExpenseContext } from "./ExpenseContext";
 // Import your Expense Context and models similarly to Income
 // import { ExpenseContext } from "./ExpenseContext"; 
- import { DefaultExpense, SecondaryExpense, EXPENSE_CATEGORIES } from "./models";
+ import { DefaultExpense, SecondaryExpense } from "./models";
 
 const generateUniqueId = () =>
 	`EXS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;

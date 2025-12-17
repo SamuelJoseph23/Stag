@@ -26,7 +26,6 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
     if (!expenseData || !expenseData.className) return null;
     
     // Helper to restore Date objects which turn into strings in JSON
-    const startDate = new Date(expenseData.startDate);
     const endDate = new Date(expenseData.endDate);
 
     switch (expenseData.className) {
@@ -44,7 +43,6 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
                 expenseData.name, 
                 expenseData.amount,
                 expenseData.frequency,
-                startDate,
                 endDate,
             ), expenseData);
         default:

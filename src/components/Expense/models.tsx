@@ -37,7 +37,6 @@ export class SecondaryExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
-    startDate: Date,
     endDate: Date
   ) {
     super(id, name, amount, frequency, endDate);
