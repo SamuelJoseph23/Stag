@@ -2,16 +2,16 @@ import React, { useContext } from 'react';
 import { ExpenseContext } from './ExpenseContext';
 
 interface DeleteControlProps {
-    ExpenseId: string;
+    expenseId: string;
 }
 
-const DeleteExpenseControl: React.FC<DeleteControlProps> = ({ ExpenseId }) => {
+const DeleteExpenseControl: React.FC<DeleteControlProps> = ({ expenseId }) => {
     const { dispatch } = useContext(ExpenseContext);
 
     const handleDelete = () => {
         dispatch({ 
             type: 'DELETE_EXPENSE', 
-            payload: { id: ExpenseId } 
+            payload: { id: expenseId } 
         });
     };
 

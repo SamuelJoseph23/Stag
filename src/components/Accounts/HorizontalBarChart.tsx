@@ -120,8 +120,8 @@ export default function HorizontalBarChart({
 	}, [accountList]);
 
 	return (
-		<div className="mb-2">
-			<div className="flex justify-center text-white">
+		<div className="mb-1">
+			<div className="flex justify-center text-white text-xs">
 				{type} $
                 {/* Display the Net Worth, not the Visual Total */}
 				{displayTotal.toLocaleString(undefined, {
@@ -129,7 +129,7 @@ export default function HorizontalBarChart({
 					maximumFractionDigits: 2,
 				})}
 			</div>
-			<div className="w-full h-3 flex rounded-lg overflow-hidden mt-1">
+			<div className="w-full h-2 flex rounded-lg overflow-hidden mt-1">
 				{chartData.map((seg) => (
 					<div
 						key={`${seg.category}-${seg.account}`}

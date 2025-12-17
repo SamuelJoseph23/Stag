@@ -48,24 +48,24 @@ export class SecondaryExpense extends BaseExpense {
 export type AnyExpense = DefaultExpense | SecondaryExpense;
 
 export const EXPENSE_CATEGORIES = [
-  'DefaultExpense',
-  'SecondaryExpense',
+  'Default',
+  'Secondary',
 ] as const;
 
 export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
 
 export const EXPENSE_COLORS_BACKGROUND: Record<ExpenseCategory, string> = {
-    DefaultExpense: "bg-chart-Fuchsia-50",
-    SecondaryExpense: "bg-chart-Blue-50",
+    Default: "bg-chart-Fuchsia-50",
+    Secondary: "bg-chart-Blue-50",
 };
 
 export const CLASS_TO_CATEGORY: Record<string, ExpenseCategory> = {
-    [DefaultExpense.name]: 'DefaultExpense',
-    [SecondaryExpense.name]: 'SecondaryExpense',
+    [DefaultExpense.name]: 'Default',
+    [SecondaryExpense.name]: 'Secondary',
 };
 
 // Map Categories to their color palettes (using Tailwind classes)
 export const CATEGORY_PALETTES: Record<ExpenseCategory, string[]> = {
-	DefaultExpense: Array.from({ length: 100 }, (_, i) => `bg-chart-Fuchsia-${i + 1}`),
-	SecondaryExpense: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Default: Array.from({ length: 100 }, (_, i) => `bg-chart-Fuchsia-${i + 1}`),
+	Secondary: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
 };

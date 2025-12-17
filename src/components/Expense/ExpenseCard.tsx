@@ -2,7 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { 
     AnyExpense, 
     DefaultExpense,
-    EXPENSE_COLORS_BACKGROUND 
+    EXPENSE_COLORS_BACKGROUND, 
+	SecondaryExpense
 } from "./models";
 import { ExpenseContext, AllExpenseKeys } from "./ExpenseContext";
 import { StyledInput, StyledSelect } from "../Layout/StyleUI";
@@ -85,12 +86,14 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
     };
 
 	const getDescriptor = () => {
-		if (expense instanceof DefaultExpense) return "DefaultExpense";
-		return "Expense";
+		if (expense instanceof DefaultExpense) return "DEFAULT";
+		if (expense instanceof SecondaryExpense) return "SECONDARY";
+		return "EXPENSE";
 	};
 
 	const getIconBg = () => {
-		if (expense instanceof DefaultExpense) return EXPENSE_COLORS_BACKGROUND["DefaultExpense"];
+		if (expense instanceof DefaultExpense) return EXPENSE_COLORS_BACKGROUND["Default"];
+		if (expense instanceof SecondaryExpense) return EXPENSE_COLORS_BACKGROUND["Secondary"];
 		return "bg-gray-500";
 	};
 
@@ -122,7 +125,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 					/>
 				</div>
 				<div className="text-chart-Red-75 ml-auto">
-					<DeleteExpenseControl ExpenseId={expense.id} />
+					<DeleteExpenseControl expenseId={expense.id} />
 				</div>
 			</div>
 

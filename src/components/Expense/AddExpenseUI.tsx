@@ -3,7 +3,7 @@ import { ExpenseContext } from "./ExpenseContext";
 import { AnyExpense } from "./models";
 
 const generateUniqueId = () =>
-	`INC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+	`EXS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
 interface AddControlProps {
 	ExpenseClass: new (
@@ -63,7 +63,7 @@ const AddExpenseControl: React.FC<AddControlProps> = ({
 					focus:outline-none 
 					focus:border-green-300"
 					type="text"
-					placeholder={`Add New ${title} Expense`}
+					placeholder={`Add New ${title} expense`}
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					onKeyDown={handleKeyPress}

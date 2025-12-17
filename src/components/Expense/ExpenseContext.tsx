@@ -17,7 +17,7 @@ type Action =
   | { type: 'DELETE_EXPENSE'; payload: { id: string } }
   | { type: 'UPDATE_EXPENSE_FIELD'; payload: { id: string; field: AllExpenseKeys; value: any } };
 
-const STORAGE_KEY = 'user_Expenses_data';
+const STORAGE_KEY = 'user_expenses_data';
 const initialState: AppState = {
   expenses: [],
 };
@@ -48,12 +48,12 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
                 endDate,
             ), expenseData);
         default:
-            console.warn(`Unknown Expense type: ${expenseData.className}`);
+            console.warn(`Unknown expense type: ${expenseData.className}`);
             return null;
     }
 }
 
-const ExpenseReducer = (state: AppState, action: Action): AppState => {
+const expenseReducer = (state: AppState, action: Action): AppState => {
   switch (action.type) {
     case 'ADD_EXPENSE':
       return {
@@ -97,7 +97,7 @@ export const ExpenseContext = createContext<ExpenseContextProps>({
 });
 
 export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
-    const [state, dispatch] = useReducer(ExpenseReducer, initialState, (initial) => {
+    const [state, dispatch] = useReducer(expenseReducer, initialState, (initial) => {
         try {
             const savedState = localStorage.getItem(STORAGE_KEY);
             if (savedState) {
@@ -109,7 +109,7 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
 
                 return {
                     ...parsedState,
-                    Expenses: reconstitutedExpenses,
+                    expenses: reconstitutedExpenses,
                 };
             }
         } catch (e) {
@@ -122,7 +122,7 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
         try {
             const serializableState = {
                 ...state,
-                Expenses: state.expenses.map(exp => ({
+                expenses: state.expenses.map(exp => ({
                     ...exp,
                     className: exp.constructor.name,
                 }))

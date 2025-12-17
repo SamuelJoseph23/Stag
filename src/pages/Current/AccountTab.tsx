@@ -21,14 +21,12 @@ const AccountList = ({ type }: { type: any }) => {
 
 	return (
 		<div className="space-y-6">
-			     {" "}
 			{filteredAccounts.map((account) => (
 				<AccountCard
 					key={`${account.id}-${account.constructor.name}`}
 					account={account}
 				/>
 			))}
-			   {" "}
 		</div>
 	);
 };
@@ -52,94 +50,96 @@ const TabsContent = () => {
 	const tabContent: Record<string, React.ReactNode> = {
 		Saved: (
 			<div className="p-4">
-				                <AccountList type={SavedAccount} />
-				               {" "}
-				<AddAccountControl AccountClass={SavedAccount} title="Savings" />       
-				   {" "}
+				<AccountList type={SavedAccount} />
+				<AddAccountControl AccountClass={SavedAccount} title="Savings" />     
 			</div>
 		),
 		Invested: (
 			<div className="p-4">
-				                <AccountList type={InvestedAccount} />
-				                 
+				<AccountList type={InvestedAccount} />
 				<AddAccountControl
 					AccountClass={InvestedAccount}
 					title="Investment"
 					defaultArgs={[0]}
 				/>
-				           {" "}
 			</div>
 		),
 		Property: (
 			<div className="p-4">
-				                <AccountList type={PropertyAccount} />
-				               {" "}
+				<AccountList type={PropertyAccount} />
 				<AddAccountControl
 					AccountClass={PropertyAccount}
 					title="Property"
 					defaultArgs={["Owned", 0, 0, "Simple", 0]}
 				/>
-				           {" "}
 			</div>
 		),
 		Debt: (
 			<div className="p-4">
-				                <AccountList type={DebtAccount} />
-				               {" "}
+				<AccountList type={DebtAccount} />
 				<AddAccountControl
 					AccountClass={DebtAccount}
 					title="Debt"
 					defaultArgs={[0, "Simple", 0]}
 				/>
-				           {" "}
 			</div>
 		),
 	};
 
+	const isSavedVisible = savedAccounts.length > 0 && (investedAccounts.length > 0 || propertyAccounts.length > 0 || debtAccounts.length > 0);
+    const isInvestedVisible = investedAccounts.length > 0 && (savedAccounts.length > 0 || propertyAccounts.length > 0 || debtAccounts.length > 0);
+    const isPropertyVisible = propertyAccounts.length > 0 && (savedAccounts.length > 0 || investedAccounts.length > 0 || debtAccounts.length > 0);
+    const isDebtVisible = debtAccounts.length > 0 && (savedAccounts.length > 0 || investedAccounts.length > 0 || propertyAccounts.length > 0);
+
+    const visibleChartCount = [
+        isSavedVisible,
+        isInvestedVisible,
+        isPropertyVisible,
+        isDebtVisible
+    ].filter(Boolean).length;
+    
+    const gridClass = visibleChartCount > 1 ? 'grid-cols-2' : 'grid-cols-1';
+
 	return (
 		<div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
-			           {" "}
 			<div className="w-15/16 max-w-5xl">
-				               {" "}
 				<div className="space-y-4 mb-4 p-4 bg-gray-900 rounded-xl border border-gray-800">
-					                   {" "}
-					<h2 className="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">
-						Portfolio Breakdown
-					</h2>
-					                   {" "}
-					<HorizontalBarChart
-						type="Total Net Worth"
-						accountList={allAccounts}
-					/>
-					                   {" "}
-					<div className="grid grid-cols-2 gap-4 pt-2">
-						                       {" "}
-						<HorizontalBarChart
-							type="Saved Accounts"
-							accountList={savedAccounts}
-						/>
-						                       {" "}
-						<HorizontalBarChart
-							type="Investment Accounts"
-							accountList={investedAccounts}
-						/>
-						                       {" "}
-						<HorizontalBarChart
-							type="Property Accounts"
-							accountList={propertyAccounts}
-						/>
-						                       {" "}
-						<HorizontalBarChart
-							type="Debt Accounts"
-							accountList={debtAccounts}
-						/>
-						                   {" "}
-					</div>
-					               {" "}
+                {allAccounts.length > 0 && (
+                    <HorizontalBarChart
+                        type="Total Net Worth"
+                        accountList={allAccounts}
+                    />
+                )}
+                {visibleChartCount > 0 && (
+                    <div className={`grid ${gridClass} gap-4 pt-2`}>
+                        {isSavedVisible && (
+                            <HorizontalBarChart
+                                type="Saved Accounts"
+                                accountList={savedAccounts}
+                            />
+                        )}
+                        {isInvestedVisible && (
+                            <HorizontalBarChart
+                                type="Investment Accounts"
+                                accountList={investedAccounts}
+                            />
+                        )}
+                        {isPropertyVisible && (
+                            <HorizontalBarChart
+                                type="Property Accounts"
+                                accountList={propertyAccounts}
+                            />
+                        )}
+                        {isDebtVisible && (
+                            <HorizontalBarChart
+                                type="Debt Accounts"
+                                accountList={debtAccounts}
+                            />
+                        )}
+                    </div>
+                )}
 				</div>
-				               {" "}
 				<div className="bg-gray-900 rounded-lg overflow-hidden mb-1 flex border border-gray-800">
-					                   {" "}
 					{tabs.map((tab) => (
 						<button
 							key={tab}
@@ -150,18 +150,14 @@ const TabsContent = () => {
 							}`}
 							onClick={() => setActiveTab(tab)}
 						>
-							                            {tab}                       {" "}
+							                            {tab}
 						</button>
 					))}
-					               {" "}
 				</div>
-				               {" "}
 				<div className="bg-[#09090b] border border-gray-800 rounded-xl min-h-[400px] mb-4">
-					                    {tabContent[activeTab]}               {" "}
+					                    {tabContent[activeTab]}
 				</div>
-				           {" "}
 			</div>
-			       {" "}
 		</div>
 	);
 };

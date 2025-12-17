@@ -95,37 +95,67 @@ const TabsContent = () => {
         ),
     };
 
+    const isWorkVisible = workIncomes.length > 0 && (ssIncomes.length > 0 || passiveIncomes.length > 0 || windfallIncomes.length > 0 || rsuIncomes.length > 0);
+    const isSSVisible = ssIncomes.length > 0 && (workIncomes.length > 0 || passiveIncomes.length > 0 || windfallIncomes.length > 0 || rsuIncomes.length > 0);
+    const isPassiveVisible = passiveIncomes.length > 0 && (workIncomes.length > 0 || ssIncomes.length > 0 || windfallIncomes.length > 0 || rsuIncomes.length > 0);
+    const isWindfallVisible = windfallIncomes.length > 0 && (workIncomes.length > 0 || ssIncomes.length > 0 || passiveIncomes.length > 0 || rsuIncomes.length > 0);
+    const isRSUVisible = rsuIncomes.length > 0 && (workIncomes.length > 0 || ssIncomes.length > 0 || passiveIncomes.length > 0 || windfallIncomes.length > 0);
+
+    const visibleChartCount = [
+        isWorkVisible,
+        isSSVisible,
+        isPassiveVisible,
+        isWindfallVisible,
+        isRSUVisible
+    ].filter(Boolean).length;
+    
+    const gridClass = visibleChartCount > 1 ? 'grid-cols-2' : 'grid-cols-1';
+
     return (
         <div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
             <div className="w-15/16 max-w-5xl">
                 <div className="space-y-4 mb-4 p-4 bg-gray-900 rounded-xl border border-gray-800">
                     <h2 className="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Income Breakdown (Monthly Normalized)</h2>
-                    <IncomeHorizontalBarChart 
-                        type="Total Monthly Income" 
-                        incomeList={allIncomes}
-                    />
-                    <div className="grid grid-cols-2 gap-4 pt-2">
+                    {allIncomes.length > 0 && (
                         <IncomeHorizontalBarChart 
-                            type="Work" 
-                            incomeList={workIncomes}
+                            type="Total Monthly Income" 
+                            incomeList={allIncomes}
                         />
-                        <IncomeHorizontalBarChart 
-                            type="Social Security" 
-                            incomeList={ssIncomes}
-                        />
-                        <IncomeHorizontalBarChart 
-                            type="Passive" 
-                            incomeList={passiveIncomes}
-                        />
-                         <IncomeHorizontalBarChart 
-                            type="Windfall" 
-                            incomeList={windfallIncomes}
-                        />
-                        <IncomeHorizontalBarChart 
-                            type="RSU" 
-                            incomeList={rsuIncomes}
-                        />
-                    </div>
+                    )}
+                    {visibleChartCount > 0 && (
+                        <div className={`grid ${gridClass} gap-4 pt-2`}>
+                            {isWorkVisible && (
+                                <IncomeHorizontalBarChart 
+                                    type="Work" 
+                                    incomeList={workIncomes}
+                                />
+                            )}
+                            {isSSVisible && (
+                                <IncomeHorizontalBarChart 
+                                    type="Social Security" 
+                                    incomeList={ssIncomes}
+                                />
+                            )}
+                            {isPassiveVisible && (
+                                <IncomeHorizontalBarChart 
+                                    type="Passive" 
+                                    incomeList={passiveIncomes}
+                                />
+                            )}
+                            {isWindfallVisible && (
+                                <IncomeHorizontalBarChart 
+                                    type="Windfall" 
+                                    incomeList={windfallIncomes}
+                                />
+                            )}
+                            {isRSUVisible && (
+                                <IncomeHorizontalBarChart 
+                                    type="RSU" 
+                                    incomeList={rsuIncomes}
+                                />
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="bg-gray-900 rounded-lg overflow-hidden mb-1 flex border border-gray-800 flex-wrap">
                     {tabs.map((tab) => (
