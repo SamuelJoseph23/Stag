@@ -2,7 +2,17 @@ import React, { useState, useContext } from "react";
 import { ExpenseContext } from "./ExpenseContext";
 // Import your Expense Context and models similarly to Income
 // import { ExpenseContext } from "./ExpenseContext"; 
- import { DefaultExpense, SecondaryExpense } from "./models";
+import { 
+    AnyExpense, 
+    HousingExpense,
+    LoanExpense,
+    DependentExpense,
+    HealthcareExpense,
+    VacationExpense,
+    EmergencyExpense,
+    OtherExpense,
+	EXPENSE_COLORS_BACKGROUND
+} from './models';
 
 const generateUniqueId = () =>
 	`EXS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -60,8 +70,13 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({ isOpen, onClose }) =>
     if (!isOpen) return null;
 
     const expenseCategories = [
-    { label: 'Default', class: DefaultExpense },
-    { label: 'Secondary', class: SecondaryExpense },
+    { label: 'Housing', class: HousingExpense },
+    { label: 'Loan', class: LoanExpense },
+    { label: 'Dependent', class: DependentExpense },
+    { label: 'Healthcare', class: HealthcareExpense },
+    { label: 'Vacation', class: VacationExpense },
+    { label: 'Emergency', class: EmergencyExpense },
+    { label: 'Other', class: OtherExpense }
 ];
 
     return (

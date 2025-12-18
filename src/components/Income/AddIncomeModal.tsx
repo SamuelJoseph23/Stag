@@ -4,8 +4,7 @@ import {
   WorkIncome, 
   SocialSecurityIncome, 
   PassiveIncome, 
-  WindfallIncome,
-  RSUIncome,
+  WindfallIncome
 } from '../../components/Income/models';
 
 const generateUniqueId = () =>
@@ -61,8 +60,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
             newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, sourceType);
         } else if (selectedType === WindfallIncome) {
             newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, new Date(receiptDate));
-        } else if (selectedType === RSUIncome) {
-            newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, new Date(vestingDate));
         } else {
             // Default (WorkIncome)
             newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate);
@@ -78,8 +75,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
         { label: 'Work', class: WorkIncome },
         { label: 'Social Security', class: SocialSecurityIncome },
         { label: 'Passive Income', class: PassiveIncome },
-        { label: 'Windfall', class: WindfallIncome },
-        { label: 'RSU Income', class: RSUIncome }
+        { label: 'Windfall', class: WindfallIncome }
     ];
 
     return (
@@ -154,13 +150,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1">Receipt Date</label>
                                 <input type="date" className="w-full bg-gray-950 text-white border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none" value={receiptDate} onChange={(e) => setReceiptDate(e.target.value)} />
-                            </div>
-                        )}
-
-                        {selectedType === RSUIncome && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Vesting Date</label>
-                                <input type="date" className="w-full bg-gray-950 text-white border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none" value={vestingDate} onChange={(e) => setVestingDate(e.target.value)} />
                             </div>
                         )}
                     </div>

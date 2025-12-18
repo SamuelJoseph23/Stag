@@ -4,8 +4,7 @@ import {
   WorkIncome, 
   SocialSecurityIncome, 
   PassiveIncome, 
-  WindfallIncome,
-  RSUIncome,
+  WindfallIncome
 } from '../../components/Income/models';
 import IncomeCard from '../../components/Income/IncomeCard';
 import IncomeHorizontalBarChart from '../../components/Income/IncomeHorizontalBarChart';
@@ -80,14 +79,12 @@ const TabsContent = () => {
     const ssIncomes = incomes.filter(inc => inc instanceof SocialSecurityIncome);
     const passiveIncomes = incomes.filter(inc => inc instanceof PassiveIncome);
     const windfallIncomes = incomes.filter(inc => inc instanceof WindfallIncome);
-    const rsuIncomes = incomes.filter(inc => inc instanceof RSUIncome);
 
     const visibleCharts = [
         { type: "Work", list: workIncomes },
         { type: "Social Security", list: ssIncomes },
         { type: "Passive", list: passiveIncomes },
-        { type: "Windfall", list: windfallIncomes },
-        { type: "RSU", list: rsuIncomes }
+        { type: "Windfall", list: windfallIncomes }
     ].filter(item => item.list.length > 0 && incomes.length > item.list.length);
 
     const gridClass = visibleCharts.length > 1 ? 'grid-cols-2' : 'grid-cols-1';

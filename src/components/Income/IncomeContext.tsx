@@ -4,8 +4,7 @@ import {
     WorkIncome, 
     SocialSecurityIncome, 
     PassiveIncome, 
-    WindfallIncome, 
-    RSUIncome 
+    WindfallIncome
 } from './models';
 
 type AllKeys<T> = T extends any ? keyof T : never;
@@ -30,7 +29,9 @@ function reconstituteIncome(incomeData: any): AnyIncome | null {
     if (!incomeData || !incomeData.className) return null;
     
     // Helper to restore Date objects which turn into strings in JSON
-    const endDate = new Date(incomeData.endDate);
+    const end_date = new Date(incomeData.end_date);
+    const receipt_date = new Date(incomeData.receipt_date);
+    const vesting_date = new Date(incomeData.vesting_date);
 
     switch (incomeData.className) {
         case 'WorkIncome':
@@ -39,7 +40,7 @@ function reconstituteIncome(incomeData: any): AnyIncome | null {
                 incomeData.name, 
                 incomeData.amount,
                 incomeData.frequency,
-                endDate,
+                end_date,
             ), incomeData);
         case 'SocialSecurityIncome':
             return Object.assign(new SocialSecurityIncome(
@@ -47,7 +48,7 @@ function reconstituteIncome(incomeData: any): AnyIncome | null {
                 incomeData.name, 
                 incomeData.amount, 
                 incomeData.frequency,
-                endDate,
+                end_date,
                 incomeData.claimingAge
             ), incomeData);
         case 'PassiveIncome':
@@ -56,7 +57,7 @@ function reconstituteIncome(incomeData: any): AnyIncome | null {
                 incomeData.name, 
                 incomeData.amount,
                 incomeData.frequency, 
-                endDate,
+                end_date,
                 incomeData.sourceType
             ), incomeData);
         case 'WindfallIncome':
@@ -65,17 +66,8 @@ function reconstituteIncome(incomeData: any): AnyIncome | null {
                 incomeData.name, 
                 incomeData.amount, 
                 incomeData.frequency,
-                endDate,
-                new Date(incomeData.receiptDate)
-            ), incomeData);
-        case 'RSUIncome':
-            return Object.assign(new RSUIncome(
-                incomeData.id, 
-                incomeData.name, 
-                incomeData.amount, 
-                incomeData.frequency,
-                endDate,
-                new Date(incomeData.vestingDate)
+                end_date,
+                receipt_date
             ), incomeData);
         default:
             console.warn(`Unknown income type: ${incomeData.className}`);

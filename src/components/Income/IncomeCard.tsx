@@ -4,8 +4,7 @@ import {
     WorkIncome, 
     SocialSecurityIncome, 
     PassiveIncome, 
-    WindfallIncome, 
-    RSUIncome,
+    WindfallIncome,
     INCOME_COLORS_BACKGROUND 
 } from "./models";
 import { IncomeContext, AllIncomeKeys } from "./IncomeContext";
@@ -93,7 +92,6 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 		if (income instanceof SocialSecurityIncome) return "SS";
 		if (income instanceof PassiveIncome) return "PASSIVE";
 		if (income instanceof WindfallIncome) return "WINDFALL";
-        if (income instanceof RSUIncome) return "RSU";
 		return "INCOME";
 	};
 
@@ -102,7 +100,6 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 		if (income instanceof SocialSecurityIncome) return INCOME_COLORS_BACKGROUND["SocialSecurity"];
 		if (income instanceof PassiveIncome) return INCOME_COLORS_BACKGROUND["Passive"];
 		if (income instanceof WindfallIncome) return INCOME_COLORS_BACKGROUND["Windfall"];
-        if (income instanceof RSUIncome) return INCOME_COLORS_BACKGROUND["RSU"];
 		return "bg-gray-500";
 	};
 
@@ -156,13 +153,6 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
                     options={["Weekly", "BiWeekly", "Monthly", "Annually"]}
                 />
 
-                <StyledInput
-                    label="End Date"
-                    type="date"
-                    value={formatDate(income.endDate)}
-                    onChange={(e) => handleDateChange("endDate", e.target.value)}
-                />
-
 				{income instanceof SocialSecurityIncome && (
 					<StyledInput
 						label="Claiming Age"
@@ -185,17 +175,8 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
                      <StyledInput
                         label="Receipt Date"
                         type="date"
-                        value={formatDate(income.receiptDate)}
-                        onChange={(e) => handleDateChange("receiptDate", e.target.value)}
-                    />
-                )}
-
-                {income instanceof RSUIncome && (
-                     <StyledInput
-                        label="Vesting Date"
-                        type="date"
-                        value={formatDate(income.vestingDate)}
-                        onChange={(e) => handleDateChange("vestingDate", e.target.value)}
+                        value={formatDate(income.receipt_date)}
+                        onChange={(e) => handleDateChange("receipt_date", e.target.value)}
                     />
                 )}
 			</div>

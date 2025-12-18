@@ -1,8 +1,13 @@
 import { createContext, useReducer, ReactNode, Dispatch, useEffect } from 'react';
 import { 
     AnyExpense, 
-    DefaultExpense,
-    SecondaryExpense
+    HousingExpense,
+    LoanExpense,
+    DependentExpense,
+    HealthcareExpense,
+    VacationExpense,
+    EmergencyExpense,
+    OtherExpense
 } from './models';
 
 type AllKeys<T> = T extends any ? keyof T : never;
@@ -27,24 +32,78 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
     if (!expenseData || !expenseData.className) return null;
     
     // Helper to restore Date objects which turn into strings in JSON
-    const endDate = new Date(expenseData.endDate);
+    const end_date = new Date(expenseData.end_date);
+    const start_date = new Date(expenseData.start_date);
 
     switch (expenseData.className) {
-        case 'DefaultExpense':
-            return Object.assign(new DefaultExpense(
+        case 'HousingExpense':
+            return Object.assign(new HousingExpense(
                 expenseData.id, 
                 expenseData.name, 
                 expenseData.amount,
+                expenseData.utilities,
+                expenseData.property_taxes,
+                expenseData.maintenance,
                 expenseData.frequency,
-                endDate,
+                expenseData.inflation,
             ), expenseData);
-        case 'SecondaryExpense':
-            return Object.assign(new SecondaryExpense(
+        case 'LoanExpense':
+            return Object.assign(new LoanExpense(
                 expenseData.id, 
                 expenseData.name, 
                 expenseData.amount,
                 expenseData.frequency,
-                endDate,
+                expenseData.apr,
+                expenseData.interest_type,
+                start_date,
+                expenseData.payment,
+                expenseData.is_tax_deductable,
+                expenseData.tax_deducatble,
+            ), expenseData);
+        case 'DependentExpense':
+            return Object.assign(new DependentExpense(
+                expenseData.id, 
+                expenseData.name, 
+                expenseData.amount,
+                expenseData.frequency,
+                expenseData.inflation,
+                start_date,
+                end_date,
+                expenseData.is_tax_deductable,
+                expenseData.tax_deducatble,
+            ), expenseData);
+        case 'HealthcareExpense':
+            return Object.assign(new HealthcareExpense(
+                expenseData.id, 
+                expenseData.name, 
+                expenseData.amount,
+                expenseData.frequency,
+                expenseData.inflation,
+            ), expenseData);
+        case 'VacationExpense':
+            return Object.assign(new VacationExpense(
+                expenseData.id, 
+                expenseData.name, 
+                expenseData.amount,
+                expenseData.frequency,
+                expenseData.inflation,
+            ), expenseData);
+        case 'EmergencyExpense':
+            return Object.assign(new EmergencyExpense(
+                expenseData.id, 
+                expenseData.name, 
+                expenseData.amount,
+                expenseData.frequency,
+                expenseData.inflation,
+            ), expenseData);
+        case 'OtherExpense':
+            return Object.assign(new OtherExpense(
+                expenseData.id, 
+                expenseData.name, 
+                expenseData.amount,
+                expenseData.frequency,
+                end_date,
+                expenseData.inflation,
             ), expenseData);
         default:
             console.warn(`Unknown expense type: ${expenseData.className}`);

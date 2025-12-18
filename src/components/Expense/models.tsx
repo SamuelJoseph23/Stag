@@ -1,9 +1,11 @@
+import { AnyIncome } from "../Income/models";
+
 export interface Expense {
   id: string;
   name: string;
   amount: number;
-  frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually';
-  endDate: Date;
+  frequency: 'Daily'| 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually';
+  inflation: number;
 }
 
 // 2. Base Abstract Class
@@ -12,59 +14,179 @@ export abstract class BaseExpense implements Expense {
     public id: string,
     public name: string,
     public amount: number,
-    public frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
-    public endDate: Date
+    public frequency: 'Daily' | 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    public inflation: number 
   ) {}
 }
 
 // 3. Concrete Classes
 
-export class DefaultExpense extends BaseExpense {
+export class HousingExpense extends BaseExpense {
   constructor(
     id: string,
     name: string,
     amount: number,
+    public utilities: number,
+    public property_taxes: number,
+    public maintenance: number,
     frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
-    endDate: Date
+    inflation: number,
   ) {
-    super(id, name, amount, frequency, endDate);
+    super(id, name, amount, frequency, inflation);
   }
 }
 
-export class SecondaryExpense extends BaseExpense {
+export class LoanExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Annually',
+    public apr: number,
+    public interest_type: 'Compounding' | 'Simple',
+    public start_date: Date,
+    public payment: number,
+    public is_tax_deductable: Boolean,
+    public tax_deducatble: number
+    
+  ) {
+    super(id, name, amount, frequency, 0);
+  }
+}
+
+export class DependentExpense extends BaseExpense {
   constructor(
     id: string,
     name: string,
     amount: number,
     frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
-    endDate: Date
+    inflation: number,
+    public start_date: Date,
+    public end_date: Date,
+    public is_tax_deductable: Boolean,
+    public tax_deducatble: number
   ) {
-    super(id, name, amount, frequency, endDate);
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class HealthcareExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    inflation: number,
+  ) {
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class VacationExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Monthly' | 'Annually',
+    inflation: number
+  ) {
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class EmergencyExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    inflation: number
+  ) {
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class IncomeDeductionExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    public income: AnyIncome,
+    inflation: number
+  ) {
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class TransportExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    public end_date: Date,
+    inflation: number
+  ) {
+    super(id, name, amount, frequency, inflation);
+  }
+}
+
+export class OtherExpense extends BaseExpense {
+  constructor(
+    id: string,
+    name: string,
+    amount: number,
+    frequency: 'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually',
+    public end_date: Date,
+    inflation: number
+  ) {
+    super(id, name, amount, frequency, inflation);
   }
 }
 
 // Union type for use in State Management
-export type AnyExpense = DefaultExpense | SecondaryExpense;
+export type AnyExpense = HousingExpense | LoanExpense | DependentExpense | HealthcareExpense | VacationExpense | EmergencyExpense | OtherExpense;
 
 export const EXPENSE_CATEGORIES = [
-  'Default',
-  'Secondary',
+  'Housing',
+  'Loan',
+  'Dependent',
+  'Healthcare',
+  'Vacation',
+  'Emergency',
+  'Other'
 ] as const;
 
 export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
 
 export const EXPENSE_COLORS_BACKGROUND: Record<ExpenseCategory, string> = {
-    Default: "bg-chart-Fuchsia-50",
-    Secondary: "bg-chart-Blue-50",
+    Housing: "bg-chart-Fuchsia-50",
+    Loan: "bg-chart-Blue-50",
+    Dependent: "bg-chart-Blue-50",
+    Healthcare: "bg-chart-Blue-50",
+    Vacation: "bg-chart-Blue-50",
+    Emergency: "bg-chart-Blue-50",
+    Other: "bg-chart-Blue-50",
 };
 
 export const CLASS_TO_CATEGORY: Record<string, ExpenseCategory> = {
-    [DefaultExpense.name]: 'Default',
-    [SecondaryExpense.name]: 'Secondary',
+    [HousingExpense.name]: 'Housing',
+    [LoanExpense.name]: 'Loan',
+    [DependentExpense.name]: 'Dependent',
+    [HealthcareExpense.name]: 'Healthcare',
+    [VacationExpense.name]: 'Vacation',
+    [EmergencyExpense.name]: 'Emergency',
+    [OtherExpense.name]: 'Other',
 };
 
 // Map Categories to their color palettes (using Tailwind classes)
 export const CATEGORY_PALETTES: Record<ExpenseCategory, string[]> = {
-	Default: Array.from({ length: 100 }, (_, i) => `bg-chart-Fuchsia-${i + 1}`),
-	Secondary: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Housing: Array.from({ length: 100 }, (_, i) => `bg-chart-Fuchsia-${i + 1}`),
+	Loan: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Dependent: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Healthcare: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Vacation: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Emergency: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
+	Other: Array.from({ length: 100 }, (_, i) => `bg-chart-Blue-${i + 1}`),
 };

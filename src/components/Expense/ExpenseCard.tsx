@@ -1,10 +1,15 @@
 import React, { useContext, useState, useEffect } from "react";
 import { 
     AnyExpense, 
-    DefaultExpense,
-    EXPENSE_COLORS_BACKGROUND, 
-	SecondaryExpense
-} from "./models";
+    HousingExpense,
+    LoanExpense,
+    DependentExpense,
+    HealthcareExpense,
+    VacationExpense,
+    EmergencyExpense,
+    OtherExpense,
+	EXPENSE_COLORS_BACKGROUND
+} from './models';
 import { ExpenseContext, AllExpenseKeys } from "./ExpenseContext";
 import { StyledInput, StyledSelect } from "../Layout/StyleUI";
 import DeleteExpenseControl from './DeleteExpenseUI';
@@ -86,14 +91,24 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
     };
 
 	const getDescriptor = () => {
-		if (expense instanceof DefaultExpense) return "DEFAULT";
-		if (expense instanceof SecondaryExpense) return "SECONDARY";
+		if (expense instanceof HousingExpense) return "HOUSING";
+		if (expense instanceof LoanExpense) return "LOAN";
+		if (expense instanceof DependentExpense) return "DEPENDENT";
+		if (expense instanceof HealthcareExpense) return "HEALTHCARE";
+		if (expense instanceof VacationExpense) return "VACATION";
+		if (expense instanceof EmergencyExpense) return "EMERGENCY";
+		if (expense instanceof OtherExpense) return "OTHER";
 		return "EXPENSE";
 	};
 
 	const getIconBg = () => {
-		if (expense instanceof DefaultExpense) return EXPENSE_COLORS_BACKGROUND["Default"];
-		if (expense instanceof SecondaryExpense) return EXPENSE_COLORS_BACKGROUND["Secondary"];
+		if (expense instanceof HousingExpense) return EXPENSE_COLORS_BACKGROUND["Housing"];
+		if (expense instanceof LoanExpense) return EXPENSE_COLORS_BACKGROUND["Loan"];
+		if (expense instanceof DependentExpense) return EXPENSE_COLORS_BACKGROUND["Dependent"];
+		if (expense instanceof HealthcareExpense) return EXPENSE_COLORS_BACKGROUND["Healthcare"];
+		if (expense instanceof VacationExpense) return EXPENSE_COLORS_BACKGROUND["Vacation"];
+		if (expense instanceof EmergencyExpense) return EXPENSE_COLORS_BACKGROUND["Emergency"];
+		if (expense instanceof OtherExpense) return EXPENSE_COLORS_BACKGROUND["Other"];
 		return "bg-gray-500";
 	};
 
@@ -145,13 +160,6 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                     value={expense.frequency}
                     onChange={(e) => handleGlobalUpdate("frequency", e.target.value)}
                     options={["Weekly", "BiWeekly", "Monthly", "Annually"]}
-                />
-
-                <StyledInput
-                    label="End Date"
-                    type="date"
-                    value={formatDate(expense.endDate)}
-                    onChange={(e) => handleDateChange("endDate", e.target.value)}
                 />
 			</div>
 		</div>

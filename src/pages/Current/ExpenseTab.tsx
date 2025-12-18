@@ -1,9 +1,15 @@
 import { useState, useContext } from 'react';
 import { ExpenseContext } from '../../components/Expense/ExpenseContext';
 import { 
-  DefaultExpense,
-  SecondaryExpense,
-  BaseExpense,
+    BaseExpense, 
+    HousingExpense,
+    LoanExpense,
+    DependentExpense,
+    HealthcareExpense,
+    VacationExpense,
+    EmergencyExpense,
+    OtherExpense,
+	EXPENSE_COLORS_BACKGROUND
 } from '../../components/Expense/models';
 import ExpenseCard from '../../components/Expense/ExpenseCard';
 import ExpenseHorizontalBarChart from '../../components/Expense/ExpenseHorizontalBarChart';
@@ -77,15 +83,31 @@ const TabsContent = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Filtering logic for charts
-    const defaultExpenses = expenses.filter(exp => exp instanceof DefaultExpense);
-    const secondaryExpenses = expenses.filter(exp => exp instanceof SecondaryExpense);
+    const houseingExpenses = expenses.filter(exp => exp instanceof HousingExpense);
+    const loanExpenses = expenses.filter(exp => exp instanceof LoanExpense);
+    const dependentExpenses = expenses.filter(exp => exp instanceof DependentExpense);
+    const healthcareExpenses = expenses.filter(exp => exp instanceof HealthcareExpense);
+    const vacationExpenses = expenses.filter(exp => exp instanceof VacationExpense);
+    const emergencyExpenses = expenses.filter(exp => exp instanceof EmergencyExpense);
+    const otherExpenses = expenses.filter(exp => exp instanceof OtherExpense);
 
     // Only show sub-charts if both types exist (consistent with your existing logic)
-    const showSubCharts = defaultExpenses.length > 0 && secondaryExpenses.length > 0;
+    const showSubCharts = houseingExpenses.length > 0
+                           && loanExpenses.length > 0
+                           && dependentExpenses.length > 0
+                           && healthcareExpenses.length > 0
+                           && vacationExpenses.length > 0
+                           && emergencyExpenses.length > 0
+                           && otherExpenses.length > 0;
 
     const visibleCharts = [
-        { type: "DefaultExpense", list: defaultExpenses },
-        { type: "SecondaryExpense", list: secondaryExpenses }
+        { type: "HousingExpense", list: houseingExpenses },
+        { type: "LoanExpense", list: loanExpenses },
+        { type: "DependentExpense", list: dependentExpenses },
+        { type: "HealthcareExpense", list: healthcareExpenses },
+        { type: "VacationExpense", list: vacationExpenses },
+        { type: "EmergencyExpense", list: emergencyExpenses },
+        { type: "OtherExpense", list: otherExpenses }
     ].filter(chart => showSubCharts && chart.list.length > 0);
 
     const gridClass = visibleCharts.length > 1 ? 'grid-cols-2' : 'grid-cols-1';
