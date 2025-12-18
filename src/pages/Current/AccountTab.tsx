@@ -146,41 +146,45 @@ const TabsContent = () => {
 	return (
 		<div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
 			<div className="w-15/16 max-w-5xl">
+				
 				<div className="space-y-4 mb-4 p-4 bg-gray-900 rounded-xl border border-gray-800">
-                {allAccounts.length > 0 && (
-                    <HorizontalBarChart
-                        type="Total Net Worth"
-                        accountList={allAccounts}
-                    />
-                )}
-                {visibleChartCount > 0 && (
-                    <div className={`grid ${gridClass} gap-4 pt-2`}>
-                        {isSavedVisible && (
-                            <HorizontalBarChart
-                                type="Saved Accounts"
-                                accountList={savedAccounts}
-                            />
-                        )}
-                        {isInvestedVisible && (
-                            <HorizontalBarChart
-                                type="Investment Accounts"
-                                accountList={investedAccounts}
-                            />
-                        )}
-                        {isPropertyVisible && (
-                            <HorizontalBarChart
-                                type="Property Accounts"
-                                accountList={propertyAccounts}
-                            />
-                        )}
-                        {isDebtVisible && (
-                            <HorizontalBarChart
-                                type="Debt Accounts"
-                                accountList={debtAccounts}
-                            />
-                        )}
-                    </div>
-                )}
+					<h2 className="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">
+                        Account Balances
+                    </h2>
+					{allAccounts.length > 0 && (
+						<HorizontalBarChart
+							type="Total Net Worth"
+							accountList={allAccounts}
+						/>
+					)}
+					{visibleChartCount > 0 && (
+						<div className={`grid ${gridClass} gap-4 pt-2`}>
+							{isSavedVisible && (
+								<HorizontalBarChart
+									type="Saved Accounts"
+									accountList={savedAccounts}
+								/>
+							)}
+							{isInvestedVisible && (
+								<HorizontalBarChart
+									type="Investment Accounts"
+									accountList={investedAccounts}
+								/>
+							)}
+							{isPropertyVisible && (
+								<HorizontalBarChart
+									type="Property Accounts"
+									accountList={propertyAccounts}
+								/>
+							)}
+							{isDebtVisible && (
+								<HorizontalBarChart
+									type="Debt Accounts"
+									accountList={debtAccounts}
+								/>
+							)}
+						</div>
+					)}
 				</div>
 				<div className="bg-gray-900 rounded-lg overflow-hidden mb-1 flex border border-gray-800">
 					{tabs.map((tab) => (
