@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./index.css";
 import Sidebar from "./components/Layout/Sidebar";
 import TopBar from "./components/Layout/TopBar";
@@ -16,7 +16,6 @@ import { ExpenseProvider } from './components/Expense/ExpenseContext';
 export default function App() {
   const [isOpen, setIsOpen] = useState(false); // shared variable
   return (
-    <BrowserRouter basename="/Stag">
       <AccountProvider>
         <IncomeProvider>
           <ExpenseProvider>
@@ -44,6 +43,5 @@ export default function App() {
           </ExpenseProvider>
         </IncomeProvider>
       </AccountProvider>
-    </BrowserRouter>
   );
 }
