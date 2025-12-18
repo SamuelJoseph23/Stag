@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+import "./index.css";
 import Sidebar from "./components/Layout/Sidebar";
 import TopBar from "./components/Layout/TopBar";
 import Dashboard from "./pages/Dashboard";
@@ -15,32 +16,34 @@ import { ExpenseProvider } from './components/Expense/ExpenseContext';
 export default function App() {
   const [isOpen, setIsOpen] = useState(false); // shared variable
   return (
-    <AccountProvider>
-      <IncomeProvider>
-        <ExpenseProvider>
-          <div className="flex h-screen">
-            <Sidebar isOpen={isOpen}/>
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <TopBar setIsOpen={setIsOpen} title="Menu"/>
+    <BrowserRouter basename="/Stag">
+      <AccountProvider>
+        <IncomeProvider>
+          <ExpenseProvider>
+            <div className="flex h-screen">
+              <Sidebar isOpen={isOpen}/>
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <TopBar setIsOpen={setIsOpen} title="Menu"/>
 
-              <main className="flex-1 overflow-y-auto">
-                <Routes>
-                  <Route index element={<Dashboard />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
+                <main className="flex-1 overflow-y-auto">
+                  <Routes>
+                    <Route index element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
 
-                  <Route path="/current" element={<AccountTab />} />
-                  <Route path="/current/accounts" element={<AccountTab />} />
-                  <Route path="/current/income" element={<IncomeTab />} />
-                  <Route path="/current/expense" element={<ExpenseTab />} />
-                              
-                  <Route path="/future" element={<Future />} />
-                  <Route path="/testing" element={<Testing />} />
-                </Routes>
-              </main>
+                    <Route path="/current" element={<AccountTab />} />
+                    <Route path="/current/accounts" element={<AccountTab />} />
+                    <Route path="/current/income" element={<IncomeTab />} />
+                    <Route path="/current/expense" element={<ExpenseTab />} />
+                                
+                    <Route path="/future" element={<Future />} />
+                    <Route path="/testing" element={<Testing />} />
+                  </Routes>
+                </main>
+              </div>
             </div>
-          </div>
-        </ExpenseProvider>
-      </IncomeProvider>
-    </AccountProvider>
+          </ExpenseProvider>
+        </IncomeProvider>
+      </AccountProvider>
+    </BrowserRouter>
   );
 }
