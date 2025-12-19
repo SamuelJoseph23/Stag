@@ -132,9 +132,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 	return (
 		<div className="w-full">
 			<div className="flex gap-4 mb-4">
-				<div
-					className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-sm font-bold text-white`}
-				>
+				<div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-sm font-bold text-white`}>
 					{getDescriptor().slice(0, 1)}
 				</div>
 				<div className="grow"> 
@@ -165,16 +163,99 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                     label="Frequency"
                     value={expense.frequency}
                     onChange={(e) => handleGlobalUpdate("frequency", e.target.value)}
-                    options={["Weekly", "Monthly", "Annually"]}
+                    options={["Daily", "Weekly", "BiWeekly", "Monthly", "Annually"]}
                 />
 
-				{expense instanceof LoanExpense && (
-					<StyledInput
-					label="Receipt Date"
-					type="date"
-					value={formatDate(expense.start_date)}
-					onChange={(e) => handleDateChange("start_date", e.target.value)}
-				/>)}
+                <StyledInput
+                    label="Inflation (%)"
+                    type="number"
+                    value={expense.inflation}
+                    onChange={(e) => handleGlobalUpdate("inflation", Number(e.target.value))}
+                />
+
+                {/* --- Specialized Housing Fields --- */}
+                {expense instanceof HousingExpense && (
+                    <>
+                        <StyledInput label="Utilities ($)" type="number" value={expense.utilities} onChange={(e) => handleGlobalUpdate("utilities", Number(e.target.value))} />
+                        <StyledInput label="Property Taxes ($)" type="number" value={expense.property_taxes} onChange={(e) => handleGlobalUpdate("property_taxes", Number(e.target.value))} />
+                        <StyledInput label="Maintenance ($)" type="number" value={expense.maintenance} onChange={(e) => handleGlobalUpdate("maintenance", Number(e.target.value))} />
+                    </>
+                )}
+
+                {/* --- Specialized Loan Fields --- */}
+                {expense instanceof LoanExpense && (
+    			<>
+					<StyledInput 
+						label="APR (%)" 
+						type="number" 
+						value={expense.apr} 
+						onChange={(e) => handleGlobalUpdate("apr", Number(e.target.value))} 
+					/>
+					<StyledSelect 
+						label="Interest Type" 
+						value={expense.interest_type} 
+						onChange={(e) => handleGlobalUpdate("interest_type", e.target.value)} 
+						options={["Simple", "Compounding"]} 
+					/>
+					<StyledInput 
+						label="Start Date" 
+						type="date" 
+						value={formatDate(expense.start_date)} 
+						onChange={(e) => handleDateChange("start_date", e.target.value)} 
+					/>
+					<StyledInput 
+						label="Payment ($)" 
+						type="number" 
+						value={expense.payment} 
+						onChange={(e) => handleGlobalUpdate("payment", Number(e.target.value))} 
+					/>
+					<StyledSelect 
+						label="Tax Deductible" 
+						value={expense.is_tax_deductible} 
+						onChange={(e) => handleGlobalUpdate("is_tax_deductible", e.target.value)} 
+						options={["Yes", "No"]} 
+					/>
+					{(expense.is_tax_deductible === 'Yes') && (
+						<StyledInput 
+							label="Deductible Amount ($)" 
+							type="number" 
+							value={expense.tax_deductible} 
+							onChange={(e) => handleGlobalUpdate("tax_deductible", Number(e.target.value))} 
+						/>
+					)}
+				</>
+			)}
+
+            {expense instanceof DependentExpense && (
+			<>
+				<StyledInput 
+					label="Start Date" 
+					type="date" 
+					value={formatDate(expense.start_date)} 
+					onChange={(e) => handleDateChange("start_date", e.target.value)} 
+				/>
+				<StyledInput 
+					label="End Date" 
+					type="date" 
+					value={formatDate(expense.end_date)} 
+					onChange={(e) => handleDateChange("end_date", e.target.value)} 
+				/>
+				<StyledSelect 
+					label="Tax Deductible" 
+					value={expense.is_tax_deductible} 
+					onChange={(e) => handleGlobalUpdate("is_tax_deductible", e.target.value)} 
+					options={["Yes", "No"]} 
+				/>
+				{(expense.is_tax_deductible === 'Yes') && (
+					<StyledInput 
+						label="Deductible Amount ($)" 
+						type="number" 
+						value={expense.tax_deductible} 
+						onChange={(e) => handleGlobalUpdate("tax_deductible", Number(e.target.value))} 
+					/>
+				)}
+			</>
+		)}
 			</div>
 		</div>
 	);

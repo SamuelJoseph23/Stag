@@ -9,7 +9,6 @@ type IncomeHorizontalBarChartProps = {
 const getMonthlyAmount = (income: AnyIncome) => {
     switch (income.frequency) {
         case 'Weekly': return income.amount * 52 / 12;
-        case 'BiWeekly': return income.amount * 26 / 12;
         case 'Monthly': return income.amount;
         case 'Annually': return income.amount / 12;
         default: return 0;

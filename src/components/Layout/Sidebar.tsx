@@ -16,7 +16,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 	const currentSubLinks = [
         { path: "/current/accounts", label: "Accounts" },
         { path: "/current/income", label: "Income" },
-        { path: "/current/expense", label: "Expense" },
+        { path: "/current/expense", label: "Expenses" },
     ];
 
 	const currentIcon = (

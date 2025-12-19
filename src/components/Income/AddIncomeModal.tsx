@@ -21,7 +21,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
     const [selectedType, setSelectedType] = useState<any>(null);
     const [name, setName] = useState("");
     const [amount, setAmount] = useState<number>(0);
-    const [frequency, setFrequency] = useState<'Weekly' | 'BiWeekly' | 'Monthly' | 'Annually'>('Monthly');
+    const [frequency, setFrequency] = useState<'Weekly' | 'Monthly' | 'Annually'>('Monthly');
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     
     // --- New State for Optional Fields ---
@@ -124,7 +124,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
                                 <label className="block text-sm font-medium text-gray-400 mb-1">Frequency</label>
                                 <select className="w-full bg-gray-950 text-white border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none appearance-none" value={frequency} onChange={(e) => setFrequency(e.target.value as any)}>
                                     <option value="Weekly">Weekly</option>
-                                    <option value="BiWeekly">Bi-Weekly</option>
                                     <option value="Monthly">Monthly</option>
                                     <option value="Annually">Annually</option>
                                 </select>
