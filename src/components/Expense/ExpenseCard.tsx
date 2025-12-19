@@ -15,6 +15,8 @@ import {
 import { ExpenseContext, AllExpenseKeys } from "./ExpenseContext";
 import { StyledInput, StyledSelect } from "../Layout/StyleUI";
 import DeleteExpenseControl from './DeleteExpenseUI';
+import { IncomeContext } from "../Income/IncomeContext";
+import { AccountContext } from "../Accounts/AccountContext";
 
 const formatCurrency = (value: number | string): string => {
 	if (value === null || value === undefined || value === 0 || value === "")
@@ -42,20 +44,48 @@ const formatDate = (date: Date): string => {
 };
 
 const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
-	const { dispatch } = useContext(ExpenseContext);
+	const { dispatch: expenseDispatch } = useContext(ExpenseContext);
+    const { dispatch: accountDispatch } = useContext(AccountContext); // Get account dispatch
+	const { incomes } = useContext(IncomeContext);
 	const [focusedField, setFocusedField] = useState<string | null>(null);
 	
     // We only need local state for the amount field to handle currency formatting while typing
     const [localAmount, setLocalAmount] = useState<string>("0.00");
+	const isHousing = expense instanceof HousingExpense;
 
 	useEffect(() => {
-		if (focusedField !== "amount") {
-			setLocalAmount(formatCurrency(expense.amount));
-		}
-	}, [expense.amount, focusedField]);
+        if (focusedField !== "amount") {
+            const val = isHousing ? (expense as HousingExpense).payment : expense.amount;
+            setLocalAmount(formatCurrency(val));
+        }
+    }, [expense.amount, (expense as any).payment, focusedField, isHousing]);
 
 	const handleGlobalUpdate = (field: AllExpenseKeys, value: any) => {
-		dispatch({
+		expenseDispatch({
+			type: "UPDATE_EXPENSE_FIELD",
+			payload: { id: expense.id, field, value },
+		});
+	
+		if (expense instanceof LoanExpense && expense.linkedAccountId) {
+            const accId = expense.linkedAccountId;
+            
+            if (field === 'name') {
+                accountDispatch({ type: 'UPDATE_ACCOUNT_FIELD', payload: { id: accId, field: 'name', value }});
+            }
+            if (field === 'apr') {
+                accountDispatch({ type: 'UPDATE_ACCOUNT_FIELD', payload: { id: accId, field: 'apr', value }});
+            }
+            if (field === 'amount' || field === 'payment') {
+                 // Sync monthly payment
+                accountDispatch({ type: 'UPDATE_ACCOUNT_FIELD', payload: { id: accId, field: 'monthlyPayment', value }});
+            }
+            if (field === 'interest_type') {
+                 const mappedType = value === 'Compounding' ? 'Compound' : 'Simple';
+                accountDispatch({ type: 'UPDATE_ACCOUNT_FIELD', payload: { id: accId, field: 'interestType', value: mappedType }});
+            }
+        }
+		
+		expenseDispatch({
 			type: "UPDATE_EXPENSE_FIELD",
 			payload: { id: expense.id, field, value },
 		});
@@ -67,11 +97,11 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 
     const handleAmountBlur = () => {
         setFocusedField(null);
-        const cleanNumericValue = localAmount.replace(/[^0-9.]/g, "");
-		const numericValue = parseFloat(cleanNumericValue);
+        const numericValue = parseFloat(localAmount.replace(/[^0-9.]/g, ""));
 
-		if (!isNaN(numericValue)) {
-            handleGlobalUpdate("amount", numericValue);
+        if (!isNaN(numericValue)) {
+            // Update 'payment' for housing, otherwise 'amount'
+            handleGlobalUpdate(isHousing ? "payment" : "amount", numericValue);
             setLocalAmount(formatCurrency(numericValue));
         }
     };
@@ -151,7 +181,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
                 {/* Common Fields */}
 				<StyledInput
-					label="Amount ($)"
+					label={isHousing ? "Payment ($)" : "Amount ($)"}
 					type="text"
 					value={getLocalAmountValue()}
 					onChange={handleAmountChange}
@@ -174,13 +204,16 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 />
 
                 {/* --- Specialized Housing Fields --- */}
-                {expense instanceof HousingExpense && (
-                    <>
-                        <StyledInput label="Utilities ($)" type="number" value={expense.utilities} onChange={(e) => handleGlobalUpdate("utilities", Number(e.target.value))} />
-                        <StyledInput label="Property Taxes ($)" type="number" value={expense.property_taxes} onChange={(e) => handleGlobalUpdate("property_taxes", Number(e.target.value))} />
-                        <StyledInput label="Maintenance ($)" type="number" value={expense.maintenance} onChange={(e) => handleGlobalUpdate("maintenance", Number(e.target.value))} />
-                    </>
-                )}
+                {isHousing && (
+					<>
+						<StyledInput label="Utilities ($)" type="number" value={expense.utilities} onChange={(e) => handleGlobalUpdate("utilities", Number(e.target.value))} />
+						<StyledInput label="Property Taxes ($)" type="number" value={expense.property_taxes} onChange={(e) => handleGlobalUpdate("property_taxes", Number(e.target.value))} />
+						<StyledInput label="Maintenance ($)" type="number" value={expense.maintenance} onChange={(e) => handleGlobalUpdate("maintenance", Number(e.target.value))} />
+						<div className="text-xs text-gray-500 italic mt-1">
+							Total Housing Amount: ${formatCurrency(expense.amount)}
+						</div>
+					</>
+				)}
 
                 {/* --- Specialized Loan Fields --- */}
                 {expense instanceof LoanExpense && (
@@ -227,35 +260,52 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 			)}
 
             {expense instanceof DependentExpense && (
-			<>
-				<StyledInput 
-					label="Start Date" 
-					type="date" 
-					value={formatDate(expense.start_date)} 
-					onChange={(e) => handleDateChange("start_date", e.target.value)} 
-				/>
-				<StyledInput 
-					label="End Date" 
-					type="date" 
-					value={formatDate(expense.end_date)} 
-					onChange={(e) => handleDateChange("end_date", e.target.value)} 
-				/>
-				<StyledSelect 
-					label="Tax Deductible" 
-					value={expense.is_tax_deductible} 
-					onChange={(e) => handleGlobalUpdate("is_tax_deductible", e.target.value)} 
-					options={["Yes", "No"]} 
-				/>
-				{(expense.is_tax_deductible === 'Yes') && (
+				<>
 					<StyledInput 
-						label="Deductible Amount ($)" 
-						type="number" 
-						value={expense.tax_deductible} 
-						onChange={(e) => handleGlobalUpdate("tax_deductible", Number(e.target.value))} 
+						label="Start Date" 
+						type="date" 
+						value={formatDate(expense.start_date)} 
+						onChange={(e) => handleDateChange("start_date", e.target.value)} 
 					/>
-				)}
-			</>
-		)}
+					<StyledInput 
+						label="End Date" 
+						type="date" 
+						value={formatDate(expense.end_date)} 
+						onChange={(e) => handleDateChange("end_date", e.target.value)} 
+					/>
+					<StyledSelect 
+						label="Tax Deductible" 
+						value={expense.is_tax_deductible} 
+						onChange={(e) => handleGlobalUpdate("is_tax_deductible", e.target.value)} 
+						options={["Yes", "No"]} 
+					/>
+					{(expense.is_tax_deductible === 'Yes') && (
+						<StyledInput 
+							label="Deductible Amount ($)" 
+							type="number" 
+							value={expense.tax_deductible} 
+							onChange={(e) => handleGlobalUpdate("tax_deductible", Number(e.target.value))} 
+						/>
+					)}
+				</>
+			)}
+
+			{expense instanceof IncomeDeductionExpense && (
+				<StyledSelect
+					label="Linked Income Source"
+					// Display the name of the currently linked income
+					value={expense.income.name} 
+					onChange={(e) => {
+						// Find the full income object by the selected name
+						const selectedInc = incomes.find(inc => inc.name === e.target.value);
+						if (selectedInc) {
+							handleGlobalUpdate("income", selectedInc);
+						}
+					}}
+					// Map all income names into the dropdown options
+					options={incomes.map(inc => inc.name)}
+				/>
+			)}
 			</div>
 		</div>
 	);

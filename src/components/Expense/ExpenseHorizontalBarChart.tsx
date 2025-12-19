@@ -46,7 +46,6 @@ export default function ExpenseHorizontalBarChart({
 			}
 		}
 
-        // Calculate totals based on Normalized Monthly Amount
 		const categoryTotals = Object.fromEntries(
 			EXPENSE_CATEGORIES.map((c) => [
 				c,

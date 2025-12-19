@@ -34,7 +34,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	const [frequency, setFrequency] = useState<"Weekly" | "Monthly" | "Annually">(
 		"Monthly"
 	);
-	const [inflation, setInflation] = useState<number>(0);
+	const [inflation, setInflation] = useState<number>(2);
 
 	// --- New State for Specialized Fields ---
 	const [utilities, setUtilities] = useState<number>(0);
@@ -50,7 +50,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	const [endDate, setEndDate] = useState(
 		new Date().toISOString().split("T")[0]
 	);
-	const [income, setIncome] = useState(incomes[0]);
+    const [selectedIncomeId, setSelectedIncomeId] = useState<string>(incomes[0]?.id || "");
 	const [payment, setPayment] = useState<number>(0);
 	const [isTaxDeductible, setIsTaxDeductible] = useState<"Yes" | "No">("Yes");
 	const [taxDeductibleAmount, setTaxDeductibleAmount] = useState<number>(0);
@@ -60,6 +60,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 		setSelectedType(null);
 		setName("");
 		setAmount(0);
+        setInflation(2);
 		onClose();
 	};
 
@@ -90,22 +91,23 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
 		// Logic to handle specialized constructors from models.tsx
 		if (selectedType === HousingExpense) {
+            newExpense = new HousingExpense(
+                id,
+                name.trim(),
+                payment,      // Component 1
+                utilities,    // Component 2
+                propertyTaxes,// Component 3
+                maintenance,  // Component 4
+                frequency,
+                inflation
+            );
+        } else if (selectedType === LoanExpense) {
 			newExpense = new selectedType(
 				id,
 				name.trim(),
 				amount,
-				utilities,
-				propertyTaxes,
-				maintenance,
 				frequency,
-				inflation
-			);
-		} else if (selectedType === LoanExpense) {
-			newExpense = new selectedType(
-				id,
-				name.trim(),
-				amount,
-				frequency,
+                inflation,
 				apr,
 				interestType,
 				finalStartDate,
@@ -134,18 +136,25 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 				name.trim(),
 				amount,
 				frequency,
-				finalEndDate,
 				inflation
 			);
 		} else if (selectedType === IncomeDeductionExpense) {
-			newExpense = new IncomeDeductionExpense(
-				id,
-				name.trim(),
-				amount,
-				frequency,
-				income,
-				inflation
-			);
+        // Find the full income object based on the ID stored in state
+        const linkedIncome = incomes.find(inc => inc.id === selectedIncomeId);
+        
+        if (!linkedIncome) {
+            alert("Please select a valid income source");
+            return;
+        }
+
+        newExpense = new IncomeDeductionExpense(
+            id,
+            name.trim(),
+            amount,
+            frequency,
+            linkedIncome, // Passing the actual income object
+            inflation
+        );
 		} else {
 			// Healthcare, Vacation, Emergency
 			newExpense = new selectedType(
@@ -253,42 +262,29 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
 						{/* --- Specialized Fields based on models.tsx --- */}
 						{selectedType === HousingExpense && (
-							<div className="grid grid-cols-3 gap-2">
-								<div>
-									<label className="block text-xs font-medium text-gray-400 mb-1">
-										Utilities
-									</label>
-									<input
-										type="number"
-										className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-2 text-sm focus:border-green-300 outline-none appearance-none"
-										value={utilities}
-										onChange={(e) => setUtilities(Number(e.target.value))}
-									/>
-								</div>
-								<div>
-									<label className="block text-xs font-medium text-gray-400 mb-1">
-										Taxes
-									</label>
-									<input
-										type="number"
-										className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-2 text-sm focus:border-green-300 outline-none appearance-none"
-										value={propertyTaxes}
-										onChange={(e) => setPropertyTaxes(Number(e.target.value))}
-									/>
-								</div>
-								<div>
-									<label className="block text-xs font-medium text-gray-400 mb-1">
-										Maint.
-									</label>
-									<input
-										type="number"
-										className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-2 text-sm focus:border-green-300 outline-none appearance-none"
-										value={maintenance}
-										onChange={(e) => setMaintenance(Number(e.target.value))}
-									/>
-								</div>
-							</div>
-						)}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Rent/Mortgage Payment</label>
+                                    <input type="number" className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3" 
+                                        value={payment} onChange={(e) => setPayment(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Utilities</label>
+                                    <input type="number" className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3" 
+                                        value={utilities} onChange={(e) => setUtilities(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Property Taxes</label>
+                                    <input type="number" className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3" 
+                                        value={propertyTaxes} onChange={(e) => setPropertyTaxes(Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Maintenance</label>
+                                    <input type="number" className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3" 
+                                        value={maintenance} onChange={(e) => setMaintenance(Number(e.target.value))} />
+                                </div>
+                            </div>
+                        )}
 
 						{selectedType === LoanExpense && (
 							<div className="space-y-4">
@@ -432,20 +428,24 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 						)}
 
 						{selectedType === IncomeDeductionExpense && (
-							<div>
-								<label className="block text-sm font-medium text-gray-400 mb-1">
-									Income
-								</label>
-								<select
-									className="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none appearance-none"
-									value={income.name}
-									onChange={(e) => setIncome(e.target.value as any)}
-								>
-									<option value={incomes[0].id}>{incomes[0].name}</option>
-									<option value={incomes[0].id}>{incomes[0].name}</option>
-								</select>
-							</div>
-						)}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">
+                                    Linked Income Account
+                                </label>
+                                <select
+                                    className="w-full bg-gray-950 text-white border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none appearance-none"
+                                    value={selectedIncomeId}
+                                    onChange={(e) => setSelectedIncomeId(e.target.value)}
+                                >
+                                    <option value="" disabled>Select an income source...</option>
+                                    {incomes.map((inc) => (
+                                        <option key={inc.id} value={inc.id}>
+                                            {inc.name} ({inc.amount})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 					</div>
 				)}
 

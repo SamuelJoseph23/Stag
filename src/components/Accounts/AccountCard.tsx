@@ -3,6 +3,8 @@ import { AnyAccount, SavedAccount, InvestedAccount, PropertyAccount, DebtAccount
 import { AccountContext, AllAccountKeys } from "./AccountContext";
 import { StyledInput, StyledSelect } from "../Layout/StyleUI";
 import DeleteAccountControl from '../../components/Accounts/DeleteAccountUI';
+import { ExpenseContext } from "../Expense/ExpenseContext";
+import { LoanExpense } from "../Expense/models";
 
 const formatCurrency = (value: number | string): string => {
 	if (value === null || value === undefined || value === 0 || value === "")
@@ -19,7 +21,8 @@ const isFullyFormatted = (value: string) =>
 	value.includes(",") || value.includes("0.");
 
 const AccountCard = ({ account }: { account: AnyAccount }) => {
-	const { dispatch } = useContext(AccountContext);
+	const { dispatch: accountDispatch } = useContext(AccountContext);
+    const { expenses, dispatch: expenseDispatch } = useContext(ExpenseContext);
 	const [focusedField, setFocusedField] = useState<string | null>(null);
 	const [localCurrencyValues, setLocalCurrencyValues] = useState<
 		Record<string, string>
@@ -45,13 +48,45 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 			});
 		}
 	}, [account, focusedField]);
-	const handleGlobalUpdate = (field: AllAccountKeys) => {
+	const handleGlobalUpdate = (field: AllAccountKeys, value: any = null) => {
 		const stringValue = localCurrencyValues[field.toString()] || "0";
 		const cleanNumericValue = stringValue.replace(/[^0-9.]/g, "");
 		const numericValue = parseFloat(cleanNumericValue);
+		
+		const finalValue = value !== null ? value : /* retrieve from local state logic */ 0; 
+        
+		accountDispatch({
+			type: "UPDATE_ACCOUNT_FIELD",
+			payload: { id: account.id, field, value: finalValue },
+		});
+
+		if (account instanceof DebtAccount) {
+            // Find the linked expense
+            const linkedExpense = expenses.find(
+                e => e instanceof LoanExpense && e.linkedAccountId === account.id
+            );
+
+            if (linkedExpense) {
+                if (field === 'name') {
+                    expenseDispatch({ type: 'UPDATE_EXPENSE_FIELD', payload: { id: linkedExpense.id, field: 'name', value: finalValue }});
+                }
+                if (field === 'apr') {
+                    expenseDispatch({ type: 'UPDATE_EXPENSE_FIELD', payload: { id: linkedExpense.id, field: 'apr', value: finalValue }});
+                }
+                if (field === 'monthlyPayment') {
+                    // Update both amount and payment on expense side
+                    expenseDispatch({ type: 'UPDATE_EXPENSE_FIELD', payload: { id: linkedExpense.id, field: 'amount', value: finalValue }});
+                    expenseDispatch({ type: 'UPDATE_EXPENSE_FIELD', payload: { id: linkedExpense.id, field: 'payment', value: finalValue }});
+                }
+                if (field === 'interestType') {
+                    const mappedType = finalValue === 'Compound' ? 'Compounding' : 'Simple';
+                    expenseDispatch({ type: 'UPDATE_EXPENSE_FIELD', payload: { id: linkedExpense.id, field: 'interest_type', value: mappedType }});
+                }
+            }
+        }
 
 		if (isNaN(numericValue)) return;
-		dispatch({
+		accountDispatch({
 			type: "UPDATE_ACCOUNT_FIELD",
 			payload: { id: account.id, field, value: numericValue },
 		});
@@ -77,7 +112,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 			parseFloat(
 				localCurrencyValues.balance.replace(/[^0-9.]/g, "").replace("$", "")
 			) || 0;
-		dispatch({
+		accountDispatch({
 			type: "ADD_BALANCE_SNAPSHOT",
 			payload: { id: account.id, balance: numericValue },
 		});
@@ -97,7 +132,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 		}));
 	};
 	const handleUpdate = (field: AllAccountKeys, value: any) => {
-		dispatch({
+		accountDispatch({
 			type: "UPDATE_ACCOUNT_FIELD",
 			payload: { id: account.id, field, value },
 		});

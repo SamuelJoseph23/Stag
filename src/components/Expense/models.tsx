@@ -25,14 +25,14 @@ export class HousingExpense extends BaseExpense {
   constructor(
     id: string,
     name: string,
-    amount: number,
+    public payment: number, // New field
     public utilities: number,
     public property_taxes: number,
     public maintenance: number,
     frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Annually',
     inflation: number,
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, payment + utilities + property_taxes + maintenance, frequency, inflation);
   }
 }
 
@@ -47,10 +47,11 @@ export class LoanExpense extends BaseExpense {
     public start_date: Date,
     public payment: number,
     public is_tax_deductible: 'Yes' | 'No',
-    public tax_deductible: number
-    
+    public tax_deductible: number,
+    inflation: number,
+    public linkedAccountId?: string
   ) {
-    super(id, name, amount, frequency, 0);
+    super(id, name, amount, frequency, inflation);
   }
 }
 

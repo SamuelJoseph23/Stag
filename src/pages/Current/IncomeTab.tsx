@@ -95,7 +95,7 @@ const TabsContent = () => {
                 {/* Chart Section */}
                 <div className="space-y-4 mb-4 p-4 bg-gray-900 rounded-xl border border-gray-800">
                     <h2 className="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">
-                        Income Breakdown (Monthly Normalized)
+                        Income Breakdown
                     </h2>
                     {incomes.length > 0 && (
                         <IncomeHorizontalBarChart 

@@ -12,8 +12,7 @@ import {
     OtherExpense
 } from './models';
 
-type AllKeys<T> = T extends any ? keyof T : never;
-export type AllExpenseKeys = AllKeys<AnyExpense>;
+export type AllExpenseKeys = keyof HousingExpense | keyof LoanExpense | keyof DependentExpense | keyof IncomeDeductionExpense | keyof TransportExpense;
 
 interface AppState {
   expenses: AnyExpense[];
@@ -39,94 +38,96 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
 
     switch (expenseData.className) {
         case 'HousingExpense':
-            return Object.assign(new HousingExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.utilities,
-                expenseData.property_taxes,
-                expenseData.maintenance,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new HousingExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.payment, // Ensure payment is restored
+            expenseData.utilities,
+            expenseData.property_taxes,
+            expenseData.maintenance,
+            expenseData.frequency,
+            expenseData.inflation,
+          ), expenseData);
         case 'LoanExpense':
-            return Object.assign(new LoanExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.apr,
-                expenseData.interest_type,
-                start_date,
-                expenseData.payment,
-                expenseData.is_tax_deductible,
-                expenseData.tax_deductible,
-            ), expenseData);
+          return Object.assign(new LoanExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.apr,
+            expenseData.interest_type,
+            start_date,
+            expenseData.payment,
+            expenseData.is_tax_deductible,
+            expenseData.tax_deductible,
+            expenseData.inflation || 0,
+            expenseData.linkedAccountId
+          ), expenseData);
         case 'DependentExpense':
-            return Object.assign(new DependentExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-                start_date,
-                end_date,
-                expenseData.is_tax_deductible,
-                expenseData.tax_deductible,
-            ), expenseData);
+          return Object.assign(new DependentExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.inflation,
+            start_date,
+            end_date,
+            expenseData.is_tax_deductible,
+            expenseData.tax_deductible,
+          ), expenseData);
         case 'HealthcareExpense':
-            return Object.assign(new HealthcareExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new HealthcareExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.inflation,
+          ), expenseData);
         case 'VacationExpense':
-            return Object.assign(new VacationExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new VacationExpense(
+              expenseData.id, 
+              expenseData.name, 
+              expenseData.amount,
+              expenseData.frequency,
+              expenseData.inflation,
+          ), expenseData);
         case 'EmergencyExpense':
-            return Object.assign(new EmergencyExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new EmergencyExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.inflation,
+          ), expenseData);
         case 'IncomeDeductionExpense':
-            return Object.assign(new IncomeDeductionExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.income,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new IncomeDeductionExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.income,
+            expenseData.inflation,
+          ), expenseData);
         case 'TransportExpense':
-            return Object.assign(new TransportExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new TransportExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.inflation,
+          ), expenseData);
         case 'OtherExpense':
-            return Object.assign(new OtherExpense(
-                expenseData.id, 
-                expenseData.name, 
-                expenseData.amount,
-                expenseData.frequency,
-                expenseData.inflation,
-            ), expenseData);
+          return Object.assign(new OtherExpense(
+            expenseData.id, 
+            expenseData.name, 
+            expenseData.amount,
+            expenseData.frequency,
+            expenseData.inflation,
+          ), expenseData);
         default:
-            console.warn(`Unknown expense type: ${expenseData.className}`);
-            return null;
-    }
+          console.warn(`Unknown expense type: ${expenseData.className}`);
+          return null;
+  }
 }
 
 const expenseReducer = (state: AppState, action: Action): AppState => {
@@ -145,18 +146,25 @@ const expenseReducer = (state: AppState, action: Action): AppState => {
     }
 
     case 'UPDATE_EXPENSE_FIELD':
-      return {
+    return {
         ...state,
         expenses: state.expenses.map((exp) => {
-          if (exp.id === action.payload.id) {
-            const updatedExpense = Object.assign(Object.create(Object.getPrototypeOf(exp)), exp);
-            updatedExpense.className = exp.constructor.name; 
-            updatedExpense[action.payload.field] = action.payload.value;
-            return updatedExpense;
-          }
-          return exp;
+            if (exp.id === action.payload.id) {
+                const updatedExpense = Object.assign(Object.create(Object.getPrototypeOf(exp)), exp);
+                updatedExpense[action.payload.field] = action.payload.value;
+
+                if (updatedExpense instanceof HousingExpense) {
+                    updatedExpense.amount = 
+                        (updatedExpense.payment || 0) + 
+                        (updatedExpense.utilities || 0) + 
+                        (updatedExpense.property_taxes || 0) + 
+                        (updatedExpense.maintenance || 0);
+                }
+                return updatedExpense;
+            }
+            return exp;
         }),
-      };
+    };
       
     case 'REORDER_EXPENSES': {
       const result = Array.from(state.expenses);

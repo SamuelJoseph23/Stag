@@ -46,7 +46,6 @@ export default function IncomeHorizontalBarChart({
 			}
 		}
 
-        // Calculate totals based on Normalized Monthly Amount
 		const categoryTotals = Object.fromEntries(
 			INCOME_CATEGORIES.map((c) => [
 				c,
