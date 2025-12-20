@@ -41,42 +41,54 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 			});
 		}
 	}, [account, focusedField]);
-	const handleGlobalUpdate = (field: AllAccountKeys, value: any = null) => {
-		const stringValue = localCurrencyValues[field.toString()] || "0";
-		const cleanNumericValue = stringValue.replace(/[^0-9.]/g, "");
-		const numericValue = parseFloat(cleanNumericValue);
-		
-		const finalValue = value !== null ? value : /* retrieve from local state logic */ 0; 
+const handleGlobalUpdate = (field: AllAccountKeys, value: any = null) => {
+        if (value !== null) {
+            accountDispatch({
+                type: "UPDATE_ACCOUNT_FIELD",
+                payload: { id: account.id, field, value },
+            });
+
+            if (account instanceof DebtAccount && field === "name") {
+                if (account.linkedAccountId) {
+                    expenseDispatch({
+                        type: "UPDATE_EXPENSE_FIELD",
+                        payload: { 
+                            id: account.linkedAccountId, 
+                            field: "name", 
+                            value: value
+                        }, 
+                    });
+                }
+            }
+            return; 
+        }
+
+        const stringValue = localCurrencyValues[field.toString()] || "0";
+        const cleanNumericValue = stringValue.replace(/[^0-9.]/g, "");
+        const numericValue = parseFloat(cleanNumericValue);
+
+        if (isNaN(numericValue)) return;
+
+        accountDispatch({
+            type: "UPDATE_ACCOUNT_FIELD",
+            payload: { id: account.id, field, value: numericValue },
+        });
         
-		accountDispatch({
-			type: "UPDATE_ACCOUNT_FIELD",
-			payload: { id: account.id, field, value: finalValue },
-		});
+        if (account instanceof DebtAccount && field === "amount") {
+             if (account.linkedAccountId) {
+                expenseDispatch({
+                    type: "UPDATE_EXPENSE_FIELD",
+                    payload: { id: account.linkedAccountId, field: "amount", value: numericValue },
+                });
+            }
+        }
 
-		if (account instanceof DebtAccount){
-			if(field == "name"){
-				expenseDispatch({
-					type: "UPDATE_EXPENSE_FIELD",
-					payload: { id: account.linkedAccountId, field, value },
-				});
-			} else if(field == "amount"){
-				expenseDispatch({
-					type: "UPDATE_EXPENSE_FIELD",
-					payload: { id: account.linkedAccountId, field, value },
-				});
-			}
-		}
-
-		if (isNaN(numericValue)) return;
-		accountDispatch({
-			type: "UPDATE_ACCOUNT_FIELD",
-			payload: { id: account.id, field, value: numericValue },
-		});
-		setLocalCurrencyValues((prev) => ({
-			...prev,
-			[field]: formatCurrency(numericValue),
-		}));
-	};
+        // 3. Update local formatted state
+        setLocalCurrencyValues((prev) => ({
+            ...prev,
+            [field]: formatCurrency(numericValue),
+        }));
+    };
 	const handleLocalChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		field: AllAccountKeys
@@ -166,16 +178,9 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 						className="text-xl font-bold text-white bg-transparent focus:outline-none focus:ring-1 focus:ring-green-300 rounded p-1 -m-1 w-full" 
 					/>
 				</div>
-				{!(account instanceof DebtAccount) && (
-					<div className="text-chart-Red-75 ml-auto">
-						<DeleteAccountControl accountId={account.id} linkedId="" />
-					</div>
-				)}
-				{(account instanceof DebtAccount) && (
-					<div className="text-chart-Red-75 ml-auto">
-						<DeleteAccountControl accountId={account.id} linkedId={account.linkedAccountId} />
-					</div>
-				)}
+				<div className="text-chart-Red-75 ml-auto">
+					<DeleteAccountControl accountId={account.id} />
+				</div>
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
 				<StyledInput

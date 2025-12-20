@@ -152,16 +152,9 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 						className="text-xl font-bold text-white bg-transparent focus:outline-none focus:ring-1 focus:ring-green-300 rounded p-1 -m-1 w-full" 
 					/>
 				</div>
-				{!(expense instanceof LoanExpense) && (
-					<div className="text-chart-Red-75 ml-auto">
-						<DeleteExpenseControl expenseId={expense.id} linkedId="" />
-					</div>
-				)}
-				{(expense instanceof LoanExpense) && (
-					<div className="text-chart-Red-75 ml-auto">
-						<DeleteExpenseControl expenseId={expense.id} linkedId={expense.linkedAccountId} />
-					</div>
-				)}
+				<div className="text-chart-Red-75 ml-auto">
+					<DeleteExpenseControl expenseId={expense.id}/>
+				</div>
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
@@ -181,13 +174,20 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                     onChange={(e) => handleGlobalUpdate("frequency", e.target.value)}
                     options={["Daily", "Weekly", "BiWeekly", "Monthly", "Annually"]}
                 />
-
-                <StyledInput
-                    label="Inflation (%)"
-                    type="number"
-                    value={expense.inflation}
-                    onChange={(e) => handleGlobalUpdate("inflation", Number(e.target.value))}
-                />
+				{(expense instanceof HousingExpense ||
+					expense instanceof DependentExpense ||
+					expense instanceof HealthcareExpense ||
+					expense instanceof VacationExpense ||
+					expense instanceof IncomeDeductionExpense ||
+					expense instanceof TransportExpense
+				) && (
+					<StyledInput
+						label="Inflation (%)"
+						type="number"
+						value={expense.inflation}
+						onChange={(e) => handleGlobalUpdate("inflation", Number(e.target.value))}
+					/>
+				)}
 
                 {/* --- Specialized Housing Fields --- */}
                 {isHousing && (

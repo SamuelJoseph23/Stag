@@ -34,6 +34,9 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
     const handleClose = () => {
         setName("");
         setAmount(0);
+        setVestedAmount(0);
+        setOwnershipType('Owned');
+        setLoanAmount(0);
         onClose();
     };
 
@@ -59,6 +62,23 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 vestedAmount,
             );
         } else if (selectedType === PropertyAccount) {
+            if (ownershipType == "Financed"){
+                const newExpense = new LoanExpense(
+                    'EXS' + id.substring(3),
+                    name.trim(),
+                    amount,
+                    "Monthly",
+                    0,
+                    "Compounding",
+                    new Date(),
+                    0,
+                    "No",
+                    0,
+                    id
+                    )
+                expenseDispatch({type: "ADD_EXPENSE", payload: newExpense})
+            }
+
             newAccount = new selectedType(
                 id,
                 name.trim(),
@@ -78,7 +98,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 0,
                 "No",
                 0,
-                2,
                 id
             )
             expenseDispatch({type: "ADD_EXPENSE", payload: newExpense})

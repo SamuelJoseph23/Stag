@@ -94,6 +94,16 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
 		// Logic to handle specialized constructors from models.tsx
 		if (selectedType === HousingExpense) {
+			if (propertyTaxes > 0){
+				const newAccount = new DebtAccount(
+					'ACC' + id.substring(3),
+					name.trim(),
+					amount,
+					id
+				)
+
+				accountDispatch({type: "ADD_ACCOUNT", payload: newAccount})
+			}
             newExpense = new HousingExpense(
                 id,
                 name.trim(),
@@ -259,17 +269,24 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 									<option value="Annually">Annually</option>
 								</select>
 							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-400 mb-1">
-									Inflation (%)
-								</label>
-								<input
-									type="number"
-									className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none"
-									value={inflation}
-									onChange={(e) => setInflation(Number(e.target.value))}
-								/>
-							</div>
+							{(selectedType === HousingExpense || 
+							  selectedType === DependentExpense || 
+							  selectedType === HealthcareExpense || 
+							  selectedType === VacationExpense || 
+							  selectedType === IncomeDeductionExpense || 
+							  selectedType === TransportExpense) && (
+								<div>
+									<label className="block text-sm font-medium text-gray-400 mb-1">
+										Inflation (%)
+									</label>
+									<input
+										type="number"
+										className="w-full h-8 bg-gray-950 border border-gray-700 rounded-lg p-3 focus:border-green-300 outline-none"
+										value={inflation}
+										onChange={(e) => setInflation(Number(e.target.value))}
+									/>
+								</div>
+							)}
 						</div>
 
 						{/* --- Specialized Fields based on models.tsx --- */}

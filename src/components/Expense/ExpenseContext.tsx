@@ -60,7 +60,6 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
             expenseData.payment,
             expenseData.is_tax_deductible,
             expenseData.tax_deductible,
-            expenseData.inflation || 0,
             expenseData.linkedAccountId
           ), expenseData);
         case 'DependentExpense':
@@ -97,7 +96,6 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
             expenseData.name, 
             expenseData.amount,
             expenseData.frequency,
-            expenseData.inflation,
           ), expenseData);
         case 'IncomeDeductionExpense':
           return Object.assign(new IncomeDeductionExpense(
@@ -122,7 +120,6 @@ function reconstituteExpense(expenseData: any): AnyExpense | null {
             expenseData.name, 
             expenseData.amount,
             expenseData.frequency,
-            expenseData.inflation,
           ), expenseData);
         default:
           console.warn(`Unknown expense type: ${expenseData.className}`);

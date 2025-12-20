@@ -5,7 +5,6 @@ export interface Expense {
   name: string;
   amount: number;
   frequency: 'Daily'| 'Weekly' | 'Monthly' | 'Annually';
-  inflation: number;
 }
 
 // 2. Base Abstract Class
@@ -15,7 +14,6 @@ export abstract class BaseExpense implements Expense {
     public name: string,
     public amount: number,
     public frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Annually',
-    public inflation: number 
   ) {}
 }
 
@@ -30,9 +28,9 @@ export class HousingExpense extends BaseExpense {
     public property_taxes: number,
     public maintenance: number,
     frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number,
+    public inflation: number,
   ) {
-    super(id, name, payment + utilities + property_taxes + maintenance, frequency, inflation);
+    super(id, name, payment + utilities + property_taxes + maintenance, frequency);
   }
 }
 
@@ -48,10 +46,9 @@ export class LoanExpense extends BaseExpense {
     public payment: number,
     public is_tax_deductible: 'Yes' | 'No',
     public tax_deductible: number,
-    inflation: number,
     public linkedAccountId: string
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -61,13 +58,13 @@ export class DependentExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number,
+    public inflation: number,
     public start_date: Date,
     public end_date: Date,
     public is_tax_deductible: 'Yes' | 'No',
     public tax_deductible: number
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -77,9 +74,9 @@ export class HealthcareExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number,
+    public inflation: number,
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -89,9 +86,9 @@ export class VacationExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number
+    public inflation: number
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -101,9 +98,8 @@ export class EmergencyExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -114,9 +110,9 @@ export class IncomeDeductionExpense extends BaseExpense {
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
     public income: AnyIncome,
-    inflation: number
+    public inflation: number
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -126,9 +122,9 @@ export class TransportExpense extends BaseExpense {
     name: string,
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number
+    public inflation: number
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
@@ -137,10 +133,9 @@ export class OtherExpense extends BaseExpense {
     id: string,
     name: string,
     amount: number,
-    frequency: 'Weekly' | 'Monthly' | 'Annually',
-    inflation: number
+    frequency: 'Weekly' | 'Monthly' | 'Annually'
   ) {
-    super(id, name, amount, frequency, inflation);
+    super(id, name, amount, frequency);
   }
 }
 
