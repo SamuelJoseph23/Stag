@@ -23,7 +23,7 @@ type Action =
 
 const initialState: TaxState = {
   filingStatus: 'Single',
-  stateResidency: 'California',
+  stateResidency: 'DC',
   deductionMethod: 'Standard',
   fedOverride: null,
   ficaOverride: null,

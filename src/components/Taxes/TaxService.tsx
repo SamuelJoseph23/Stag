@@ -3,7 +3,7 @@ import { AnyIncome, WorkIncome } from '../Income/models';
 import { TaxParameters } from './TaxData';
 
 // Helper to convert any frequency to Annual
-const toAnnual = (amount: number, frequency: string) => {
+export const toAnnual = (amount: number, frequency: string) => {
     switch (frequency) {
         case 'Weekly': return amount * 52;
         case 'Monthly': return amount * 12;

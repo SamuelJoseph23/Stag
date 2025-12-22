@@ -30,7 +30,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
                 });
                 expenseDispatch({
                     type: "UPDATE_EXPENSE_FIELD",
-                    payload: { id: account.linkedAccountId, field: "payment", value },
+                    payload: { id: account.linkedAccountId, field: "amount", value },
                 });
             }
         }
