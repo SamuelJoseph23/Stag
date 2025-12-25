@@ -50,8 +50,7 @@ export function reconstituteIncome(data: any): AnyIncome | null {
             return new PassiveIncome(base.id, base.name, base.amount, base.frequency, base.end_date, base.earned_income, 
                 data.sourceType || 'Other');
         case 'WindfallIncome':
-            return new WindfallIncome(base.id, base.name, base.amount, base.frequency, base.end_date, base.earned_income, 
-                new Date(data.receipt_date || Date.now()));
+            return new WindfallIncome(base.id, base.name, base.amount, base.frequency, base.end_date, base.earned_income);
         default:
             return null;
     }

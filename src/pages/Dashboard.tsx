@@ -4,7 +4,7 @@ import { IncomeContext } from '../components/Income/IncomeContext';
 import { ExpenseContext } from '../components/Expense/ExpenseContext';
 import { AccountContext } from '../components/Accounts/AccountContext';
 import { NetWorthCard } from '../components/Charts/Networth';
-import { CashflowChart } from '../components/Charts/CashFlowChart';
+import { CashflowChart } from '../components/Charts/CashflowChart'
 
 export default function Dashboard() {
   const incomeCtx = useContext(IncomeContext);
