@@ -1,7 +1,8 @@
 import React, { useState, useContext } from "react";
 import { ExpenseContext } from "./ExpenseContext";
 import {
-	HousingExpense,
+	RentExpense,
+	MortgageExpense,
 	LoanExpense,
 	DependentExpense,
 	HealthcareExpense,
@@ -12,8 +13,12 @@ import {
 	OtherExpense,
 } from "./models";
 import { AccountContext } from "../Accounts/AccountContext";
-import { DebtAccount } from "../Accounts/models";
+import { DebtAccount, PropertyAccount } from "../Accounts/models";
 import { CurrencyInput } from "../Layout/CurrencyInput";
+import { PercentageInput } from "../Layout/PercentageInput";
+import { DropdownInput } from "../Layout/DropdownInput";
+import { NumberInput } from "../Layout/NumberInput";
+import { NameInput } from "../Layout/NameInput";
 
 const generateUniqueId = () =>
 	`EXS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -36,14 +41,21 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	const [frequency, setFrequency] = useState<"Weekly" | "Monthly" | "Annually">("Monthly");
 
 	// --- Specialized Fields State ---
-	const [utilities, setUtilities] = useState<number>(0);
-	const [propertyTaxes, setPropertyTaxes] = useState<number>(0);
-	const [maintenance, setMaintenance] = useState<number>(0);
-	const [apr, setApr] = useState<number>(0);
+	const [valuation, setValuation] = useState<number>(0);
+	const [loanBalance, setLoanBalance] = useState<number>(0);
+	const [apr, setApr] = useState<number>(6.23);
 	const [interestType, setInterestType] = useState<"Compounding" | "Simple">("Compounding");
-	const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+	const [termLength, setTermLength] = useState<number>(30);
+	const [propertyTaxes, setPropertyTaxes] = useState<number>(0.85);
+	const [valuationDeduction, setValuationDeduction] = useState<number>(89850);
+	const [maintenance, setMaintenance] = useState<number>(1);
+	const [utilities, setUtilities] = useState<number>(180);
+	const [homeOwnersInsurance, setHomeOwnersInsurance] = useState<number>(0.56);
+	const [pmi, setPmi] = useState<number>(0.58);
+	const [hoaFee, setHoaFee] = useState<number>(0);
 	const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
 	const [payment, setPayment] = useState<number>(0);
+	const [extraPayment, setExtraPayment] = useState<number>(0);
 	const [isTaxDeductible, setIsTaxDeductible] = useState<"Yes" | "No" | 'Itemized'>("No");
 	const [taxDeductibleAmount, setTaxDeductibleAmount] = useState<number>(0);
 
@@ -73,29 +85,46 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 		if (!name.trim() || !selectedType) return;
 
 		const id = generateUniqueId();
-		const finalStartDate = new Date(startDate);
 		const finalEndDate = new Date(endDate);
 
 		let newExpense;
 
-		if (selectedType === HousingExpense) {
-			if (propertyTaxes > 0){
-				const newAccount = new DebtAccount(
-					'ACC' + id.substring(3),
-					name.trim(),
-					amount,
-					id
-				)
-				accountDispatch({type: "ADD_ACCOUNT", payload: newAccount})
-			}
-            newExpense = new HousingExpense(
+		if (selectedType === RentExpense) {
+			newExpense = new RentExpense(
+				id,
+				name.trim(),
+				payment,
+				utilities,
+				frequency
+			);
+		} else if (selectedType === MortgageExpense) {
+			const newAccount = new PropertyAccount(
+				'ACC' + id.substring(3),
+				name.trim(),
+				valuation,
+				'Financed',
+				loanBalance,
+				id
+			)
+			accountDispatch({type: "ADD_ACCOUNT", payload: newAccount})
+            newExpense = new MortgageExpense(
                 id,
-                name.trim(),
-                payment,      
-                utilities,    
-                propertyTaxes,
-                maintenance,  
-                frequency
+				name.trim(),
+				frequency,
+				valuation,
+				loanBalance,
+				apr,
+				termLength,
+				propertyTaxes,
+				valuationDeduction,
+				maintenance,
+				utilities,
+				homeOwnersInsurance,
+				pmi,
+				hoaFee,
+				isTaxDeductible,
+				isTaxDeductible ? taxDeductibleAmount : 0,
+				'ACC' + id.substring(3)
             );
         } else if (selectedType === LoanExpense) {
 			const newAccount = new DebtAccount(
@@ -106,31 +135,30 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 			)
 			accountDispatch({type: "ADD_ACCOUNT", payload: newAccount})
 
-			newExpense = new selectedType(
+			newExpense = new LoanExpense(
 				id,
 				name.trim(),
 				amount,
 				frequency,
 				apr,
 				interestType,
-				finalStartDate,
 				payment,
 				isTaxDeductible,
-				isTaxDeductible ? taxDeductibleAmount : 0
+				isTaxDeductible ? taxDeductibleAmount : 0,
+				'ACC' + id.substring(3)
 			);
 		} else if (selectedType === DependentExpense) {
-			newExpense = new selectedType(
+			newExpense = new DependentExpense(
 				id,
 				name.trim(),
 				amount,
 				frequency,
-				finalStartDate,
 				finalEndDate,
 				isTaxDeductible,
 				isTaxDeductible ? taxDeductibleAmount : 0
 			);
 		} else if (selectedType === HealthcareExpense) {
-			newExpense = new selectedType(
+			newExpense = new HealthcareExpense(
 				id,
 				name.trim(),
 				amount,
@@ -159,7 +187,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	if (!isOpen) return null;
 
 	const expenseCategories = [
-		{ label: "Housing", class: HousingExpense },
+		{ label: "Rent", class: RentExpense },
+		{ label: "Mortgage", class: MortgageExpense },
 		{ label: "Loan", class: LoanExpense },
 		{ label: "Dependent", class: DependentExpense },
 		{ label: "Healthcare", class: HealthcareExpense },
@@ -171,8 +200,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	];
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-			<div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-md overflow-y-auto text-white">
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm min-w-max">
+			<div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl max-h-md overflow-y-auto text-white">
 				<h2 className="text-xl font-bold mb-6 border-b border-gray-800 pb-3">
 					{step === "select"
 						? "Select Expense Type"
@@ -194,163 +223,107 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 				) : (
 					<div className="space-y-4">
 						{/* Name */}
-						<div>
-                            {/* Updated Name Input to match new style */}
-							<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-								Expense Name
-							</label>
-							<input
-								autoFocus
-								className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-md focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-							/>
+						<div className="grid grid-cols-3 gap-4">
+							<div className="col-span-2">
+								<NameInput label="Expense Name" value={name} onChange={setName} />
+							</div>
+							<div className="col-span-1">
+                            <DropdownInput
+                                label="Frequency"
+                                value={frequency}
+                                onChange={(val) => setFrequency(val as any)}
+                                options={["Daily", "Weekly", "Monthly", "Annually"]}
+                            />
+							</div>
 						</div>
 
 						{/* Common Fields Grid */}
 						<div className="grid grid-cols-3 gap-4">
-                            {(!(selectedType === HousingExpense)) && (
+                            {(!(selectedType === RentExpense || selectedType === MortgageExpense || selectedType === LoanExpense)) && (
 								<CurrencyInput
 									label="Amount"
 									value={amount}
 									onChange={setAmount}
 								/>
 							)}
-                            <div>
-								<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-									Frequency
-								</label>
-                                <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                    <select
-                                        className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                        value={frequency}
-                                        onChange={(e) => setFrequency(e.target.value as any)}
-                                    >
-                                        <option value="Daily" className="bg-gray-950">Daily</option>
-                                        <option value="Weekly" className="bg-gray-950">Weekly</option>
-                                        <option value="Monthly" className="bg-gray-950">Monthly</option>
-                                        <option value="Annually" className="bg-gray-950">Annually</option>
-                                    </select>
-                                </div>
-							</div>
-						</div>
+							{((selectedType === LoanExpense)) && (
+								<CurrencyInput
+									label="Balance"
+									value={amount}
+									onChange={setAmount}
+								/>
+							)}
 
-						{/* --- Specialized Fields based on models.tsx --- */}
-						{selectedType === HousingExpense && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <CurrencyInput label="Rent/Mortgage Payment" value={payment} onChange={setPayment} />
-                                <CurrencyInput label="Utilities" value={utilities} onChange={setUtilities} />
-                                <CurrencyInput label="Property Taxes" value={propertyTaxes} onChange={setPropertyTaxes} />
-                                <CurrencyInput label="Maintenance" value={maintenance} onChange={setMaintenance} />
-                            </div>
-                        )}
+							{selectedType === RentExpense && (
+								<>
+									<CurrencyInput label="Rent Payment" value={payment} onChange={setPayment} />
+									<CurrencyInput label="Utilities" value={utilities} onChange={setUtilities} />
+								</>
+							)}
 
-						{selectedType === LoanExpense && (
-							<div className="space-y-4">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											APR (%)
-										</label>
-										<input
-											type="number"
-											className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-md focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-											value={apr}
-											onChange={(e) => setApr(Number(e.target.value))}
-										/>
-									</div>
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Interest Type
-										</label>
-                                        <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                            <select
-                                                className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                                value={interestType}
-                                                onChange={(e) => setInterestType(e.target.value as any)}
-                                            >
-                                                <option value="Simple" className="bg-gray-950">Simple</option>
-                                                <option value="Compounding" className="bg-gray-950">Compounding</option>
-                                            </select>
-                                        </div>
-									</div>
+							{selectedType === MortgageExpense && (
+								<>	
+									<CurrencyInput label="Valuation" value={valuation} onChange={setValuation} />
+									<CurrencyInput label="Loan Balance" value={loanBalance} onChange={setLoanBalance} />
+									<PercentageInput label="APR" value={apr} onChange={setApr}/>
+									<NumberInput label="Term Length (years)" value={termLength} onChange={setTermLength} />
+									<PercentageInput label="Property Tax Rate" value={propertyTaxes} onChange={setPropertyTaxes}/>
+									<CurrencyInput label="Valuation Deduction" value={valuationDeduction} onChange={setValuationDeduction} />
+									<PercentageInput label="Maintenance" value={maintenance} onChange={setMaintenance} />
+									<CurrencyInput label="Utilities" value={utilities} onChange={setUtilities} />
+									<PercentageInput label="Homeowners Insurance" value={homeOwnersInsurance} onChange={setHomeOwnersInsurance} />
+									<PercentageInput label="PMI" value={pmi} onChange={setPmi} />
+									<CurrencyInput label="HOA Fee" value={hoaFee} onChange={setHoaFee} />
+									<CurrencyInput label="Extra Payment" value={extraPayment} onChange={setExtraPayment} />
+									<DropdownInput
+										label="Tax Deductible"
+										value={isTaxDeductible}
+										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
+										options={["No", "Yes", "Itemized"]}
+									/>
+								</>
+							)}
+
+							{selectedType === LoanExpense && (
+								<>
+									<PercentageInput label="APR" value={apr} onChange={setApr}/>
+									<DropdownInput
+										label="Interest Type"
+										value={interestType}
+										onChange={(val) => setInterestType(val as "Compounding" | "Simple")}
+										options={["Simple", "Compounding"]}
+									/>
 									
-                                    <CurrencyInput label="Payment" value={payment} onChange={setPayment} />
-                                    
-                                    <div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Start Date
-										</label>
-										<input
-											type="date"
-											className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-md focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-											value={startDate}
-											onChange={(e) => setStartDate(e.target.value)}
-										/>
-									</div>
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Tax Deductible
-										</label>
-                                        <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                            <select
-                                                className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                                value={isTaxDeductible}
-                                                onChange={(e) => setIsTaxDeductible(e.target.value as any)}
-                                            >
-                                                <option value="No" className="bg-gray-950">No</option>
-                                                <option value="Yes" className="bg-gray-950">Yes</option>
-                                        		<option value="Itemized" className="bg-gray-950">Itemized</option>
-                                            </select>
-                                        </div>
-									</div>
+									<CurrencyInput label="Payment" value={payment} onChange={setPayment} />
+									
+									<DropdownInput
+										label="Tax Deductible"
+										value={isTaxDeductible}
+										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
+										options={["No", "Yes", "Itemized"]}
+									/>
 									{(isTaxDeductible === "Yes" || isTaxDeductible === "Itemized") && (
-                                        <CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
-								</div>
-							</div>
-						)}
+								</>
+							)}
 
-						{selectedType === HealthcareExpense && (
-							<div className="space-y-4">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Tax Deductible
-										</label>
-                                        <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                            <select
-                                                className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                                value={isTaxDeductible}
-                                                onChange={(e) => setIsTaxDeductible(e.target.value as any)}
-                                            >
-                                                <option value="No" className="bg-gray-950">No</option>
-                                                <option value="Yes" className="bg-gray-950">Yes</option>
-                                        		<option value="Itemized" className="bg-gray-950">Itemized</option>
-                                            </select>
-                                        </div>
-									</div>
+							{selectedType === HealthcareExpense && (
+								<>
+									<DropdownInput
+										label="Tax Deductible"
+										value={isTaxDeductible}
+										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
+										options={["No", "Yes", "Itemized"]}
+									/>
 									{(isTaxDeductible === "Yes" || isTaxDeductible === "Itemized") && (
-                                        <CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
-								</div>
-							</div>
-						)}
+								</>
+							)}
 
-						{selectedType === DependentExpense && (
-							<div className="space-y-4">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Start Date
-										</label>
-										<input
-											type="date"
-											className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-md focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-											value={startDate}
-											onChange={(e) => setStartDate(e.target.value)}
-										/>
-									</div>
+							{selectedType === DependentExpense && (
+								<>
 									<div>
 										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
 											End Date
@@ -362,54 +335,18 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 											onChange={(e) => setEndDate(e.target.value)}
 										/>
 									</div>
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Tax Deductible
-										</label>
-                                        <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                            <select
-                                                className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                                value={isTaxDeductible}
-                                                onChange={(e) => setIsTaxDeductible(e.target.value as any)}
-                                            >
-                                                <option value="Yes" className="bg-gray-950">Yes</option>
-                                                <option value="No" className="bg-gray-950">No</option>
-                                        		<option value="Itemized" className="bg-gray-950">Itemized</option>
-                                            </select>
-                                        </div>
-									</div>
+									<DropdownInput
+										label="Tax Deductible"
+										value={isTaxDeductible}
+										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
+										options={["Yes", "No", "Itemized"]}
+									/>
 									{isTaxDeductible === "Yes" && (
-                                        <CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
-								</div>
-							</div>
-						)}
-
-						{selectedType === DependentExpense && (
-							<div className="space-y-4">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-											Tax Deductible
-										</label>
-                                        <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                            <select
-                                                className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                                value={isTaxDeductible}
-                                                onChange={(e) => setIsTaxDeductible(e.target.value as any)}
-                                            >
-                                                <option value="Yes" className="bg-gray-950">Yes</option>
-                                                <option value="No" className="bg-gray-950">No</option>
-                                        		<option value="Itemized" className="bg-gray-950">Itemized</option>
-                                            </select>
-                                        </div>
-									</div>
-									{isTaxDeductible === "Yes" && (
-                                        <CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
-									)}
-								</div>
-							</div>
-						)}
+								</>
+							)}
+						</div>
 					</div>
 				)}
 

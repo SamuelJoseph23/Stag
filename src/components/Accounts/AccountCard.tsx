@@ -2,14 +2,14 @@ import { useContext, useState } from "react";
 import { AnyAccount, SavedAccount, InvestedAccount, PropertyAccount, DebtAccount, ACCOUNT_COLORS_BACKGROUND} from "./models";
 import { AccountContext, AllAccountKeys } from "./AccountContext";
 import { ExpenseContext } from "../Expense/ExpenseContext";
-import { StyledSelect } from "../Layout/StyleUI";
+import { StyledSelect, StyledDisplay } from "../Layout/StyleUI";
 import { CurrencyInput } from "../Layout/CurrencyInput"; // Import your new component
 import DeleteAccountControl from '../../components/Accounts/DeleteAccountUI';
 import { EditHistoryModal } from "./EditHistoryModal";
 
 const AccountCard = ({ account }: { account: AnyAccount }) => {
 	const { dispatch: accountDispatch } = useContext(AccountContext);
-	const { dispatch: expenseDispatch } = useContext(ExpenseContext);
+	const { expenses, dispatch: expenseDispatch } = useContext(ExpenseContext);
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     const handleFieldUpdate = (field: AllAccountKeys, value: any) => {
@@ -30,9 +30,26 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
                     type: "UPDATE_EXPENSE_FIELD",
                     payload: { id: account.linkedAccountId, field: "amount", value },
                 });
+            }
+        }
+
+		if (account instanceof PropertyAccount && account.linkedAccountId) {
+            if (field === "name") {
                 expenseDispatch({
                     type: "UPDATE_EXPENSE_FIELD",
-                    payload: { id: account.linkedAccountId, field: "amount", value },
+                    payload: { id: account.linkedAccountId, field: "name", value },
+                });
+            }
+            if (field === "amount") {
+                expenseDispatch({
+                    type: "UPDATE_EXPENSE_FIELD",
+                    payload: { id: account.linkedAccountId, field: "valuation", value },
+                });
+            }
+			if (field === "loanAmount") {
+                expenseDispatch({
+                    type: "UPDATE_EXPENSE_FIELD",
+                    payload: { id: account.linkedAccountId, field: "loan_balance", value },
                 });
             }
         }
@@ -60,6 +77,13 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 		if (account instanceof DebtAccount) return ACCOUNT_COLORS_BACKGROUND["Debt"];
 		return "bg-gray-500";
 	};
+
+	const getLinkedAccount = () => {
+		if (account instanceof DebtAccount || account instanceof PropertyAccount){
+			const linkedAccount = expenses.find((exp) => exp.id === account.linkedAccountId);
+			return linkedAccount?.name;
+		}
+	}
 
 	return (
 		<div className="w-full">
@@ -98,9 +122,9 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 
 				{account instanceof InvestedAccount && (
 					<CurrencyInput
-						label="Employer Contrib."
-						value={account.vestedAmount}
-						onChange={(val) => handleFieldUpdate("vestedAmount", val)}
+						label="Non-Vested Contrib."
+						value={account.NonVestedAmount}
+						onChange={(val) => handleFieldUpdate("NonVestedAmount", val)}
 					/>
 				)}
 
@@ -119,7 +143,19 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 								onChange={(val) => handleFieldUpdate("loanAmount", val)}
 							/>
 						)}
+						<StyledDisplay
+							label="Linked to Expense"
+							blankValue="No expense found, try re-adding"
+							value={getLinkedAccount()}
+						/>
 					</>
+				)}
+				{account instanceof DebtAccount && (
+					<StyledDisplay
+						label="Linked to Expense"
+						blankValue="No expense found, try re-adding"
+						value={getLinkedAccount()}
+					/>
 				)}
 			</div>
 			<EditHistoryModal 

@@ -26,7 +26,7 @@ const SidebarCollapseLink: React.FC<SidebarCollapseLinkProps> = ({
 }) => {
 	const { pathname } = useLocation();
 	// State to track if *this* collapsible menu is open
-	const [isExpanded, setIsExpanded] = useState(false);
+	const [isExpanded, setIsExpanded] = useState(true);
 
 	// Check if any sub-link is currently active
 	const isActiveParent = subLinks.some((link) =>

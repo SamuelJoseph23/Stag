@@ -24,8 +24,10 @@ export function getPostTaxExemptions(incomes:AnyIncome[]): number {
   return incomes.filter(inc => inc instanceof WorkIncome).reduce((acc, inc) => acc + toAnnual((inc.roth401k), inc.frequency), 0);
 }
 
-export function getUnearnedIncome(incomes:AnyIncome[]): number{
-  return incomes.filter(inc => inc.earned_income === 'No').reduce((acc, inc) => acc + toAnnual((inc.amount), inc.frequency), 0);
+export function getFicaExemptions(incomes: AnyIncome[]): number {
+  return incomes
+    .filter(inc => inc instanceof WorkIncome)
+    .reduce((acc, inc) => acc + toAnnual(inc.insurance, inc.frequency), 0);
 }
 
 export function getEarnedIncome(incomes:AnyIncome[]): number{

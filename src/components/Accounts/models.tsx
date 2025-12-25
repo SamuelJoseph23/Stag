@@ -24,7 +24,7 @@ export class InvestedAccount extends BaseAccount {
     id: string,
     name: string,
     amount: number,
-    public vestedAmount: number
+    public NonVestedAmount: number
   ) {
     super(id, name, amount);
   }
@@ -37,6 +37,7 @@ export class PropertyAccount extends BaseAccount {
     amount: number,
     public ownershipType: 'Financed' | 'Owned',
     public loanAmount: number,
+    public linkedAccountId: string
   ) {
     super(id, name, amount);
   }

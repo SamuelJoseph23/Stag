@@ -76,7 +76,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
                 {/* Simplified Currency Input */}
                 <CurrencyInput
                     label="Amount"
@@ -91,12 +91,14 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
                     options={["Weekly", "Monthly", "Annually"]}
                 />
 
-				<StyledSelect
-                    label="Earned Income"
-                    value={income.earned_income}
-                    onChange={(e) => handleFieldUpdate("earned_income", e.target.value)}
-                    options={["Yes", "No"]}
-                />
+				{!(income instanceof SocialSecurityIncome) && (
+					<StyledSelect
+						label="Earned Income"
+						value={income.earned_income}
+						onChange={(e) => handleFieldUpdate("earned_income", e.target.value)}
+						options={["Yes", "No"]}
+					/>
+				)}
 
 				{income instanceof WorkIncome && (
 					<CurrencyInput
@@ -119,8 +121,8 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 				{income instanceof WorkIncome && (
 					<CurrencyInput
 						label="Roth Contributions"
-						value={income.preTax401k}
-						onChange={(val) => handleFieldUpdate("preTax401k", val)}
+						value={income.roth401k}
+						onChange={(val) => handleFieldUpdate("roth401k", val)}
 					/>
 					
 				)}
@@ -142,15 +144,12 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
                         options={["Dividend", "Rental", "Royalty", "Other"]}
                     />
                 )}
-
-                {income instanceof WindfallIncome && (
-                     <StyledInput
-                        label="Receipt Date"
-                        type="date"
-                        value={formatDate(income.receipt_date)}
-                        onChange={(e) => handleDateChange("receipt_date", e.target.value)}
-                    />
-                )}
+				<StyledInput 
+					label="End Date" 
+					type="date" 
+					value={formatDate(income.end_date)} 
+					onChange={(e) => handleDateChange("end_date", e.target.value)} 
+				/>
 			</div>
 		</div>
 	);

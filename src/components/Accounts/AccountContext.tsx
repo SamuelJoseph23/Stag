@@ -13,7 +13,7 @@ export type AllAccountKeys = AllKeys<AnyAccount>;
 // Increment this whenever you make breaking changes to the data structure
 const CURRENT_SCHEMA_VERSION = 1;
 
-interface AmountHistoryEntry {
+export interface AmountHistoryEntry {
   date: string;
   num: number;
 }
@@ -63,7 +63,7 @@ export function reconstituteAccount(data: any): AnyAccount | null {
                 id, 
                 name, 
                 amount, 
-                data.vestedAmount || 0 // Default for new field
+                data.NonVestedAmount || 0 // Default for new field
             );
             
         case 'PropertyAccount':
@@ -72,7 +72,8 @@ export function reconstituteAccount(data: any): AnyAccount | null {
                 name, 
                 amount, 
                 data.ownershipType || 'Owned', 
-                data.loanAmount || 0
+                data.loanAmount || 0,
+                data.linkedAccountId
             );
             
         case 'DebtAccount':

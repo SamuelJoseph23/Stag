@@ -1,7 +1,8 @@
 import { createContext, useReducer, ReactNode, Dispatch, useEffect } from 'react';
 import { 
     AnyExpense, 
-    HousingExpense,
+    RentExpense,
+    MortgageExpense,
     LoanExpense,
     DependentExpense,
     HealthcareExpense,
@@ -12,7 +13,7 @@ import {
     OtherExpense
 } from './models';
 
-export type AllExpenseKeys = keyof HousingExpense | keyof LoanExpense | keyof DependentExpense | keyof TransportExpense;
+export type AllExpenseKeys = keyof RentExpense | keyof MortgageExpense | keyof LoanExpense | keyof DependentExpense | keyof TransportExpense;
 
 interface AppState {
   expenses: AnyExpense[];
@@ -41,12 +42,14 @@ export function reconstituteExpense(data: any): AnyExpense | null {
     };
 
     switch (data.className) {
-        case 'HousingExpense':
-            return new HousingExpense(base.id, base.name, data.payment || 0, data.utilities || 0, data.property_taxes || 0, data.maintenance || 0, base.frequency);
+        case 'RentExpense':
+            return new RentExpense(base.id, base.name, data.payment || 0, data.utilities || 0, base.frequency);
+        case 'MortgageExpense':
+            return new MortgageExpense(base.id, base.name, base.frequency, data.valuation || 0, data.loan_balance || 0, data.apr || 0, data.term_length || 0, data.property_taxes || 0, data.valuation_deduction || 0, data.maintenance || 0, data.utilities || 0, data.home_owners_insurance || 0, data.pmi || 0, data.hoa_fee || 0, data.is_tax_deductible || 'No', data.tax_deductible || 0, data.linkedAccountId || '', data.payment || 0, data.extra_payment || 0);
         case 'LoanExpense':
-            return new LoanExpense(base.id, base.name, base.amount, base.frequency, data.apr || 0, data.interest_type || 'Simple', new Date(data.start_date || Date.now()), data.payment || 0, data.is_tax_deductible || 'No', data.tax_deductible || 0, data.linkedAccountId || '');
+            return new LoanExpense(base.id, base.name, base.amount, base.frequency, data.apr || 0, data.interest_type || 'Simple', data.payment || 0, data.is_tax_deductible || 'No', data.tax_deductible || 0, data.linkedAccountId || '');
         case 'DependentExpense':
-            return new DependentExpense(base.id, base.name, base.amount, base.frequency, new Date(data.start_date || Date.now()), new Date(data.end_date || Date.now()), data.is_tax_deductible || 'No', data.tax_deductible || 0);
+            return new DependentExpense(base.id, base.name, base.amount, base.frequency, new Date(data.end_date || Date.now()), data.is_tax_deductible || 'No', data.tax_deductible || 0);
         case 'HealthcareExpense':
             return new HealthcareExpense(base.id, base.name, base.amount, base.frequency, data.is_tax_deductible || 'No', data.tax_deductible || 0);
         case 'VacationExpense': return new VacationExpense(base.id, base.name, base.amount, base.frequency);
@@ -82,12 +85,14 @@ const expenseReducer = (state: AppState, action: Action): AppState => {
                 const updatedExpense = Object.assign(Object.create(Object.getPrototypeOf(exp)), exp);
                 updatedExpense[action.payload.field] = action.payload.value;
 
-                if (updatedExpense instanceof HousingExpense) {
+                if (updatedExpense instanceof RentExpense) {
                     updatedExpense.amount = 
                         (updatedExpense.payment || 0) + 
-                        (updatedExpense.utilities || 0) + 
-                        (updatedExpense.property_taxes || 0) + 
-                        (updatedExpense.maintenance || 0);
+                        (updatedExpense.utilities || 0);
+                }
+                else if (updatedExpense instanceof MortgageExpense) {
+                    updatedExpense.amount = 
+                        (updatedExpense.payment || 0);
                 }
                 return updatedExpense;
             }

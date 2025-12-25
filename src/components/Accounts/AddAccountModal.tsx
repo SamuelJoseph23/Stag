@@ -7,9 +7,11 @@ import {
     DebtAccount 
 } from './models';
 import { ExpenseContext } from "../Expense/ExpenseContext";
-import { LoanExpense } from "../Expense/models";
+import { LoanExpense, MortgageExpense } from "../Expense/models";
 // 1. Import the reusable component
 import { CurrencyInput } from "../Layout/CurrencyInput";
+import { NameInput } from "../Layout/NameInput";
+import { DropdownInput } from "../Layout/DropdownInput";
 
 const generateUniqueAccId = () =>
     `ACC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -29,14 +31,14 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
     const { dispatch: expenseDispatch } = useContext(ExpenseContext);
     const [name, setName] = useState("");
     const [amount, setAmount] = useState<number>(0);
-    const [vestedAmount, setVestedAmount] = useState<number>(0);
+    const [NonVestedAmount, setNonVestedAmount] = useState<number>(0);
     const [ownershipType, setOwnershipType] = useState<'Financed' | 'Owned'>('Owned');
     const [loanAmount, setLoanAmount] = useState<number>(0);
 
     const handleClose = () => {
         setName("");
         setAmount(0);
-        setVestedAmount(0);
+        setNonVestedAmount(0);
         setOwnershipType('Owned');
         setLoanAmount(0);
         onClose();
@@ -51,25 +53,33 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
         if (selectedType === SavedAccount) {
             newAccount = new selectedType(id, name.trim(), amount);
         } else if (selectedType === InvestedAccount) {
-            newAccount = new selectedType(id, name.trim(), amount, vestedAmount);
+            newAccount = new selectedType(id, name.trim(), amount, NonVestedAmount);
         } else if (selectedType === PropertyAccount) {
             if (ownershipType == "Financed"){
-                const newExpense = new LoanExpense(
+                const newExpense = new MortgageExpense(
                     'EXS' + id.substring(3),
                     name.trim(),
+                    'Monthly',
                     amount,
-                    "Monthly",
+                    loanAmount,
+                    6.23,
+                    30,
+                    0.85,
+                    89850,
+                    1,
+                    180,
+                    0.56,
+                    0.58,
                     0,
-                    "Compounding",
-                    new Date(),
+                    'Itemized',
                     0,
-                    "No",
+                    id,
                     0,
-                    id
+                    0
                 )
                 expenseDispatch({type: "ADD_EXPENSE", payload: newExpense})
             }
-            newAccount = new selectedType(id, name.trim(), amount, ownershipType, loanAmount);
+            newAccount = new PropertyAccount(id, name.trim(), amount, ownershipType, loanAmount, 'EXS' + id.substring(3));
         } else if (selectedType === DebtAccount) {
             const newExpense = new LoanExpense(
                 'EXS' + id.substring(3),
@@ -78,7 +88,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 "Monthly",
                 0,
                 "Compounding",
-                new Date(),
                 0,
                 "No",
                 0,
@@ -96,66 +105,64 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-md overflow-y-auto text-white">
-                <div className="space-y-4"> {/* Increased space-y slightly for better breathing room with the new Inputs */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm min-w-max">
+			<div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl max-h-md overflow-y-auto text-white">
+                <div className="space-y-4">
                     
                     {/* Common Fields */}
                     <div>
-                        <label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
-                            Account Name
-                        </label>
-                        <input
-                            autoFocus
-                            className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-md focus:outline-none focus:border-green-500 transition-colors h-[42px]"
+                        <NameInput 
+                            label="Account Name"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={setName}
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4"> {/* Changed to grid-cols-2 for better fit with the boxed inputs */}
-                        
-                        {/* 2. Replace raw inputs with CurrencyInput */}
-                        <CurrencyInput
-                            label="Amount"
-                            value={amount}
-                            onChange={setAmount} // Directly pass the setter!
-                        />
-
-                        {/* --- Specialized Fields --- */}
-                        {selectedType === PropertyAccount && (
-                            <div>
-                                {/* Keeping standard select for now as we don't have a CurrencySelect component */}
-                                <label className="block text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">Status</label>
-                                <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2">
-                                    <select 
-                                        className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                        value={ownershipType} 
-                                        onChange={(e) => setOwnershipType(e.target.value as any)}
-                                    >
-                                        <option value="Owned" className="bg-gray-950">Owned</option>
-                                        <option value="Financed" className="bg-gray-950">Financed</option>
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-
-                        {ownershipType == "Financed" && (
+                    {selectedType === PropertyAccount && (
+                        <div className="grid grid-cols-3 gap-4">
                             <CurrencyInput
-                                label="Loan Amount"
-                                value={loanAmount}
-                                onChange={setLoanAmount}
+                                label="Amount"
+                                value={amount}
+                                onChange={setAmount}
                             />
-                        )}
-
-                        {selectedType === InvestedAccount && (
+                            <DropdownInput
+                                label="Ownership Type"
+                                onChange={(val) => setOwnershipType(val as "Owned" | "Financed" | "Owned")}
+                                options={["Owned", "Financed"]}
+                                value={ownershipType}
+                            />
+                            {ownershipType == "Financed" && (
+                                <CurrencyInput
+                                    label="Loan Amount"
+                                    value={loanAmount}
+                                    onChange={setLoanAmount}
+                                />
+                            )}
+                        </div>
+                    )}
+                    {selectedType === InvestedAccount && (
+                        <div className="grid grid-cols-3 gap-4">
+                                <CurrencyInput
+                                label="Amount"
+                                value={amount}
+                                onChange={setAmount}
+                            />
                             <CurrencyInput
-                                label="Employer Contrib."
-                                value={vestedAmount}
-                                onChange={setVestedAmount}
+                                label="Non-Vested Contrib."
+                                value={NonVestedAmount}
+                                onChange={setNonVestedAmount}
                             />
-                        )}
-                    </div>
+                        </div>
+                    )}
+                    {!(selectedType === InvestedAccount || selectedType === PropertyAccount) && (
+                        <div className="grid grid-cols-1 gap-4">
+                            <CurrencyInput
+                                label="Amount"
+                                value={amount}
+                                onChange={setAmount}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-3 mt-8">

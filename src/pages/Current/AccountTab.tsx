@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef } from "react"; // Added useRef
-import { AccountContext, reconstituteAccount } from "../../components/Accounts/AccountContext";
+import { AccountContext } from "../../components/Accounts/AccountContext";
 import {
     SavedAccount,
     InvestedAccount,
@@ -8,12 +8,10 @@ import {
     ACCOUNT_CATEGORIES,
 } from "../../components/Accounts/models";
 import AccountCard from "../../components/Accounts/AccountCard";
-import HorizontalBarChart from "../../components/Accounts/HorizontalBarChart";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import AddAccountModal from "../../components/Accounts/AddAccountModal";
-import { TaxContext } from "../../components/Taxes/TaxContext";
-import { IncomeContext, reconstituteIncome } from "../../components/Income/IncomeContext";
-import { ExpenseContext, reconstituteExpense } from "../../components/Expense/ExpenseContext";
+import AccountIcicleChart from "../../components/Accounts/AccountIcicleChart";
+import { useFileManager } from "../../components/Accounts/useFileManager";
 
 const AccountList = ({ type }: { type: any }) => {
     const { accounts, dispatch } = useContext(AccountContext);
@@ -75,56 +73,13 @@ const AccountList = ({ type }: { type: any }) => {
 };
 
 const TabsContent = () => {
-    // Get export/import functions from context
-    const { accounts, amountHistory, dispatch: accountDispatch } = useContext(AccountContext);
-    const { incomes, dispatch: incomeDispatch } = useContext(IncomeContext);
-    const { expenses, dispatch: expenseDispatch } = useContext(ExpenseContext);
-    const taxContext = useContext(TaxContext); // Note: TaxContext returns { state, dispatch }
+    const { accounts } = useContext(AccountContext);
+    const { handleGlobalExport, handleGlobalImport } = useFileManager();
     const [activeTab, setActiveTab] = useState<string>("Saved");
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     // Ref for the hidden file input
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleGlobalExport = () => {
-        const fullBackup = {
-            version: 1,
-            accounts: accounts.map(a => ({ ...a, className: a.constructor.name })),
-            amountHistory,
-            incomes: incomes.map(i => ({ ...i, className: i.constructor.name })),
-            expenses: expenses.map(e => ({ ...e, className: e.constructor.name })),
-            taxSettings: taxContext?.state
-        };
-
-        const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `stag_full_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-    };
-
-    const handleGlobalImport = (json: string) => {
-        try {
-            const data = JSON.parse(json);
-
-            // 1. Reconstitute all data using the new resilient helpers
-            const newAccounts = data.accounts.map(reconstituteAccount).filter(Boolean);
-            const newIncomes = data.incomes.map(reconstituteIncome).filter(Boolean);
-            const newExpenses = data.expenses.map(reconstituteExpense).filter(Boolean);
-
-            // 2. Dispatch to all contexts
-            accountDispatch({ type: 'SET_BULK_DATA', payload: { accounts: newAccounts, amountHistory: data.amountHistory || {} } });
-            incomeDispatch({ type: 'SET_BULK_DATA', payload: { incomes: newIncomes } });
-            expenseDispatch({ type: 'SET_BULK_DATA', payload: { expenses: newExpenses } });
-            if (data.taxSettings) taxContext?.dispatch({ type: 'SET_BULK_DATA', payload: data.taxSettings });
-
-            alert("Global backup restored successfully!");
-        } catch (e) {
-            console.error(e);
-            alert("Error importing backup. Please check file format.");
-        }
-    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -146,12 +101,6 @@ const TabsContent = () => {
         // Reset the input value so you can import the same file again if needed
         e.target.value = ''; 
     };
-
-    const allAccounts = accounts;
-    const savedAccounts = accounts.filter((acc) => acc instanceof SavedAccount);
-    const investedAccounts = accounts.filter((acc) => acc instanceof InvestedAccount);
-    const propertyAccounts = accounts.filter((acc) => acc instanceof PropertyAccount);
-    const debtAccounts = accounts.filter((acc) => acc instanceof DebtAccount);
 
     const tabs = ACCOUNT_CATEGORIES;
 
@@ -222,20 +171,6 @@ const TabsContent = () => {
         ),
     };
 
-    const isSavedVisible = savedAccounts.length > 0 && (investedAccounts.length > 0 || propertyAccounts.length > 0 || debtAccounts.length > 0);
-    const isInvestedVisible = investedAccounts.length > 0 && (savedAccounts.length > 0 || propertyAccounts.length > 0 || debtAccounts.length > 0);
-    const isPropertyVisible = propertyAccounts.length > 0 && (savedAccounts.length > 0 || investedAccounts.length > 0 || debtAccounts.length > 0);
-    const isDebtVisible = debtAccounts.length > 0 && (savedAccounts.length > 0 || investedAccounts.length > 0 || propertyAccounts.length > 0);
-
-    const visibleChartCount = [
-        isSavedVisible,
-        isInvestedVisible,
-        isPropertyVisible,
-        isDebtVisible
-    ].filter(Boolean).length;
-    
-    const gridClass = visibleChartCount > 1 ? 'grid-cols-2' : 'grid-cols-1';
-
     return (
         <div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
             <div className="w-full px-8 max-w-screen-2xl">
@@ -269,39 +204,9 @@ const TabsContent = () => {
                         </div>
                     </div>
 
-                    {allAccounts.length > 0 && (
-                        <HorizontalBarChart
-                            type="Total Net Worth"
-                            accountList={allAccounts}
+                    {accounts.length > 0 && (
+                        <AccountIcicleChart accountList= {accounts}
                         />
-                    )}
-                    {visibleChartCount > 0 && (
-                        <div className={`grid ${gridClass} gap-4 pt-2`}>
-                            {isSavedVisible && (
-                                <HorizontalBarChart
-                                    type="Saved Accounts"
-                                    accountList={savedAccounts}
-                                />
-                            )}
-                            {isInvestedVisible && (
-                                <HorizontalBarChart
-                                    type="Investment Accounts"
-                                    accountList={investedAccounts}
-                                />
-                            )}
-                            {isPropertyVisible && (
-                                <HorizontalBarChart
-                                    type="Property Accounts"
-                                    accountList={propertyAccounts}
-                                />
-                            )}
-                            {isDebtVisible && (
-                                <HorizontalBarChart
-                                    type="Debt Accounts"
-                                    accountList={debtAccounts}
-                                />
-                            )}
-                        </div>
                     )}
                 </div>
 

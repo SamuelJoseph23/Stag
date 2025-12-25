@@ -6,7 +6,7 @@ interface InputGroupProps {
   className?: string;
 }
 
-const InputGroup: React.FC<InputGroupProps> = ({ label, children, className = '' }) => (
+export const InputGroup: React.FC<InputGroupProps> = ({ label, children, className = '' }) => (
   <div className={`bg-gray-900 border border-gray-700 rounded-md px-3 py-2 flex flex-col justify-center focus-within:ring-1 focus-within:ring-green-300 transition-all ${className}`}>
     <label className="text-sm text-gray-400 font-medium mb-0.5 uppercase tracking-wide">
       {label}
@@ -48,6 +48,22 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({ label, options, ...p
           </option>
         ))}
       </select>
+    </InputGroup>
+  );
+};
+
+interface StyledDisplayProps {
+  label: string;
+  value: string | undefined;
+  blankValue?: string
+}
+
+export const StyledDisplay: React.FC<StyledDisplayProps> = ({ label, value, blankValue }) => {
+  return (
+    <InputGroup label={label}>
+      <div className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 flex items-center h-[21px]">
+        {value || blankValue || '...'}
+      </div>
     </InputGroup>
   );
 };

@@ -1,7 +1,8 @@
 import { useContext } from "react";
 import { 
     AnyExpense, 
-    HousingExpense,
+    RentExpense,
+	MortgageExpense,
     LoanExpense,
     DependentExpense,
     HealthcareExpense,
@@ -14,9 +15,11 @@ import {
 } from './models';
 import { ExpenseContext, AllExpenseKeys } from "./ExpenseContext";
 import { AccountContext } from "../Accounts/AccountContext"; // Import Account Context for syncing
-import { StyledInput, StyledSelect } from "../Layout/StyleUI";
+import { StyledDisplay, StyledInput, StyledSelect } from "../Layout/StyleUI";
 import { CurrencyInput } from "../Layout/CurrencyInput"; // Import new component
 import DeleteExpenseControl from './DeleteExpenseUI';
+import { PercentageInput } from "../Layout/PercentageInput";
+import { NumberInput } from "../Layout/NumberInput";
 
 // Helper to format Date objects to YYYY-MM-DD
 const formatDate = (date: Date): string => {
@@ -32,8 +35,17 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 	const { dispatch: expenseDispatch } = useContext(ExpenseContext);
     const { dispatch: accountDispatch } = useContext(AccountContext);
 
-	const isHousing = expense instanceof HousingExpense;
+	const isHousing = expense instanceof RentExpense || expense instanceof MortgageExpense;
 
+	// --- Equity and PMI Warning Logic ---
+    let showPmiWarning = false;
+    if (expense instanceof MortgageExpense && expense.valuation > 0) {
+        const equity = (expense.valuation - expense.loan_balance) / expense.valuation;
+        if (equity > 0.2 && expense.pmi > 0) {
+            showPmiWarning = true;
+        }
+    }
+	
     // --- UNIFIED UPDATER ---
 	const handleFieldUpdate = (field: AllExpenseKeys, value: any) => {
         // 1. Update Expense
@@ -54,6 +66,52 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 accountDispatch({ type: 'UPDATE_ACCOUNT_FIELD', payload: { id: accId, field: 'amount', value }});
             }
         }
+
+		if (expense instanceof MortgageExpense) {
+			// Create a temporary clone with the new value to calculate the new payment
+			const updatedExpense = Object.assign(Object.create(Object.getPrototypeOf(expense)), expense);
+			(updatedExpense as any)[field] = value;
+
+			// Recalculate payment using the model's logic
+			if (typeof (updatedExpense as any).calculatePayment === 'function') {
+				const newPayment = (updatedExpense as any).calculatePayment();
+				if (newPayment !== expense.payment) {
+					expenseDispatch({
+						type: "UPDATE_EXPENSE_FIELD",
+						payload: { id: expense.id, field: "payment", value: newPayment },
+					});
+				}
+			}
+
+			if (typeof (updatedExpense as any).calculateDeductible === 'function') {
+				const newPayment = (updatedExpense as any).calculateDeductible();
+				if (newPayment !== expense.payment) {
+					expenseDispatch({
+						type: "UPDATE_EXPENSE_FIELD",
+						payload: { id: expense.id, field: "tax_deductible", value: newPayment },
+					});
+				}
+			}
+
+			if (field === "name") {
+                accountDispatch({
+                    type: "UPDATE_ACCOUNT_FIELD",
+                    payload: { id: expense.linkedAccountId, field: "name", value },
+                });
+            }
+            if (field === "valuation") {
+                accountDispatch({
+                    type: "UPDATE_ACCOUNT_FIELD",
+                    payload: { id: expense.linkedAccountId, field: "amount", value },
+                });
+            }
+            if (field === "loan_balance") {
+                accountDispatch({
+                    type: "UPDATE_ACCOUNT_FIELD",
+                    payload: { id: expense.linkedAccountId, field: "loanAmount", value },
+                });
+            }
+		}
 	};
 
     const handleDateChange = (field: AllExpenseKeys, dateString: string) => {
@@ -62,7 +120,8 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
     };
 
 	const getDescriptor = () => {
-		if (expense instanceof HousingExpense) return "HOUSING";
+		if (expense instanceof RentExpense) return "RENT";
+		if (expense instanceof MortgageExpense) return "Mortgage";
 		if (expense instanceof LoanExpense) return "LOAN";
 		if (expense instanceof DependentExpense) return "DEPENDENT";
 		if (expense instanceof HealthcareExpense) return "HEALTHCARE";
@@ -75,7 +134,8 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 	};
 
 	const getIconBg = () => {
-		if (expense instanceof HousingExpense) return EXPENSE_COLORS_BACKGROUND["Housing"];
+		if (expense instanceof RentExpense) return EXPENSE_COLORS_BACKGROUND["Rent"];
+		if (expense instanceof MortgageExpense) return EXPENSE_COLORS_BACKGROUND["Mortgage"];
 		if (expense instanceof LoanExpense) return EXPENSE_COLORS_BACKGROUND["Loan"];
 		if (expense instanceof DependentExpense) return EXPENSE_COLORS_BACKGROUND["Dependent"];
 		if (expense instanceof HealthcareExpense) return EXPENSE_COLORS_BACKGROUND["Healthcare"];
@@ -106,17 +166,25 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
                 {/* Logic for Housing: 
                     Housing expenses calculate 'amount' as a sum of parts.
                     The main field edits 'payment' (Rent/Mortgage).
                     Other types edit 'amount' directly.
                 */}
-				<CurrencyInput
-					label={isHousing ? "Rent/Mortgage Payment" : "Amount"}
-					value={isHousing ? (expense as HousingExpense).payment : expense.amount}
-					onChange={(val) => handleFieldUpdate(isHousing ? "payment" : "amount", val)}
-				/>
+				{ !(expense instanceof MortgageExpense) && (
+					<CurrencyInput
+						label={expense instanceof RentExpense ? "Rent/Mortgage Payment" : "Amount"}
+						value={expense instanceof RentExpense ? (expense as RentExpense).payment : expense.amount}
+						onChange={(val) => handleFieldUpdate(isHousing ? "payment" : "amount", val)}
+					/>
+				)}
+				{ expense instanceof MortgageExpense && (
+					<StyledDisplay
+						label="Mortgage Payment"
+						value={"$"+expense.payment.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+					/>
+				)}
                 
                 <StyledSelect
                     label="Frequency"
@@ -126,28 +194,96 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 />
 
                 {/* --- Specialized Housing Fields --- */}
-                {isHousing && (
+				{expense instanceof RentExpense && (
+					<CurrencyInput
+						label="Utilities"
+						value={expense.utilities}
+						onChange={(val) => handleFieldUpdate("utilities", val)}
+					/>
+				)}
+
+				{(expense instanceof MortgageExpense) && (
 					<>
-                        <CurrencyInput
-                            label="Utilities"
-                            value={expense.utilities}
-                            onChange={(val) => handleFieldUpdate("utilities", val)}
-                        />
-                         <CurrencyInput
-                            label="Property Taxes"
-                            value={expense.property_taxes}
-                            onChange={(val) => handleFieldUpdate("property_taxes", val)}
-                        />
-                         <CurrencyInput
-                            label="Maintenance"
-                            value={expense.maintenance}
-                            onChange={(val) => handleFieldUpdate("maintenance", val)}
-                        />
-						<div className="text-sm text-gray-500 italic mt-1">
-							Total: ${expense.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-						</div>
+						<CurrencyInput
+							label="Valuation"
+							value={expense.valuation}
+							onChange={(val) => handleFieldUpdate("valuation", val)}
+						/>
+						<CurrencyInput
+							label="Loan Balance"
+							value={expense.loan_balance}
+							onChange={(val) => handleFieldUpdate("loan_balance", val)}
+						/>
+						<PercentageInput
+							label="APR (%)"
+							value={expense.apr}
+							onChange={(val) => handleFieldUpdate("apr", val)}
+						/>
+						<NumberInput
+							label="Term Length (years)"
+							value={expense.term_length}
+							onChange={(val) => handleFieldUpdate("term_length", val)}
+						/>
+						<PercentageInput
+							label="Property Taxes"
+							value={expense.property_taxes}
+							onChange={(val) => handleFieldUpdate("property_taxes", val)}
+						/>
+						<CurrencyInput
+							label="Valuation Deduction"
+							value={expense.valuation_deduction}
+							onChange={(val) => handleFieldUpdate("valuation_deduction", val)}
+						/>
+						<PercentageInput
+							label="Maintenance"
+							value={expense.maintenance}
+							onChange={(val) => handleFieldUpdate("maintenance", val)}
+						/>
+						<CurrencyInput
+							label="Utilities"
+							value={expense.utilities}
+							onChange={(val) => handleFieldUpdate("utilities", val)}
+						/>
+						<PercentageInput
+							label="Homeowners Insurance"
+							value={expense.home_owners_insurance}
+							onChange={(val) => handleFieldUpdate("home_owners_insurance", val)}
+						/>
+						<PercentageInput
+							label="PMI"
+							value={expense.pmi}
+							onChange={(val) => handleFieldUpdate("pmi", val)}
+						/>
+						<CurrencyInput
+							label="HOA Fee"
+							value={expense.hoa_fee}
+							onChange={(val) => handleFieldUpdate("hoa_fee", val)}
+						/>
+						<CurrencyInput
+							label="Extra Payment"
+							value={expense.extra_payment}
+							onChange={(val) => handleFieldUpdate("extra_payment", val)}
+						/>
+						<StyledSelect 
+							label="Tax Deductible" 
+							value={expense.is_tax_deductible} 
+							onChange={(e) => handleFieldUpdate("is_tax_deductible", e.target.value)} 
+							options={["Yes", "No", "Itemized"]} 
+						/>
+						{(expense.is_tax_deductible === 'Yes' || expense.is_tax_deductible === 'Itemized') && (
+							<StyledDisplay
+								label="Deductible Amount"
+								value={"$"+expense.tax_deductible.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+							/>
+						)}
+						{showPmiWarning && (
+                            <div className="text-yellow-500 text-sm col-span-full p-2 rounded-lg bg-yellow-900/20 border border-yellow-700/50">
+                                <strong>Warning:</strong> With over 20% equity, you may be eligible to have your PMI removed. Contact your lender to inquire about the process.
+                            </div>
+                        )}
 					</>
 				)}
+                
 
                 {/* --- Specialized Loan Fields --- */}
                 {expense instanceof LoanExpense && (
@@ -163,12 +299,6 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 							value={expense.interest_type} 
 							onChange={(e) => handleFieldUpdate("interest_type", e.target.value)} 
 							options={["Simple", "Compounding"]} 
-						/>
-						<StyledInput 
-							label="Start Date" 
-							type="date" 
-							value={formatDate(expense.start_date)} 
-							onChange={(e) => handleDateChange("start_date", e.target.value)} 
 						/>
 						<CurrencyInput
 							label="Payment"
@@ -193,12 +323,6 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 
 				{expense instanceof DependentExpense && (
 					<>
-						<StyledInput 
-							label="Start Date" 
-							type="date" 
-							value={formatDate(expense.start_date)} 
-							onChange={(e) => handleDateChange("start_date", e.target.value)} 
-						/>
 						<StyledInput 
 							label="End Date" 
 							type="date" 

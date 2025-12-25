@@ -1,20 +1,12 @@
 import { useState, useContext } from 'react';
 import { ExpenseContext } from '../../components/Expense/ExpenseContext';
 import { 
-    BaseExpense, 
-    HousingExpense,
-    LoanExpense,
-    DependentExpense,
-    HealthcareExpense,
-    VacationExpense,
-    EmergencyExpense,
-    TransportExpense,
-    OtherExpense
+    BaseExpense
 } from '../../components/Expense/models';
 import ExpenseCard from '../../components/Expense/ExpenseCard';
-import ExpenseHorizontalBarChart from '../../components/Expense/ExpenseHorizontalBarChart';
 import AddExpenseModal from '../../components/Expense/AddExpenseModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import ExpenseIcicleChart from '../../components/Expense/ExpenseBarChart';
 
 const ExpenseList = ({ type }: { type: any }) => {
   const { expenses, dispatch } = useContext(ExpenseContext);
@@ -82,39 +74,6 @@ const TabsContent = () => {
     const { expenses } = useContext(ExpenseContext);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Filtering logic for charts
-    const houseingExpenses = expenses.filter(exp => exp instanceof HousingExpense);
-    const loanExpenses = expenses.filter(exp => exp instanceof LoanExpense);
-    const dependentExpenses = expenses.filter(exp => exp instanceof DependentExpense);
-    const healthcareExpenses = expenses.filter(exp => exp instanceof HealthcareExpense);
-    const vacationExpenses = expenses.filter(exp => exp instanceof VacationExpense);
-    const emergencyExpenses = expenses.filter(exp => exp instanceof EmergencyExpense);
-    const transportExpenses = expenses.filter(exp => exp instanceof TransportExpense);
-    const otherExpenses = expenses.filter(exp => exp instanceof OtherExpense);
-
-    // Only show sub-charts if both types exist (consistent with your existing logic)
-    const showSubCharts = houseingExpenses.length > 0
-                           && loanExpenses.length > 0
-                           && dependentExpenses.length > 0
-                           && healthcareExpenses.length > 0
-                           && vacationExpenses.length > 0
-                           && emergencyExpenses.length > 0
-                           && transportExpenses.length > 0
-                           && otherExpenses.length > 0;
-
-    const visibleCharts = [
-        { type: "Housing", list: houseingExpenses },
-        { type: "Loan", list: loanExpenses },
-        { type: "Dependent", list: dependentExpenses },
-        { type: "Healthcare", list: healthcareExpenses },
-        { type: "Vacation", list: vacationExpenses },
-        { type: "Emergency", list: emergencyExpenses },
-        { type: "Transport", list: transportExpenses },
-        { type: "Other", list: otherExpenses }
-    ].filter(chart => showSubCharts && chart.list.length > 0);
-
-    const gridClass = visibleCharts.length > 1 ? 'grid-cols-2' : 'grid-cols-1';
-
     return (
         <div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
             <div className="w-full px-8 max-w-screen-2xl">
@@ -125,22 +84,8 @@ const TabsContent = () => {
                     </h2>
                     
                     {expenses.length > 0 && (
-                        <ExpenseHorizontalBarChart 
-                            type="Total Monthly Expenses" 
-                            expenseList={expenses}
+                        <ExpenseIcicleChart expenseList= {expenses}
                         />
-                    )}
-
-                    {visibleCharts.length > 0 && (
-                        <div className={`grid ${gridClass} gap-4 pt-2`}>
-                            {visibleCharts.map((chart) => (
-                                <ExpenseHorizontalBarChart 
-                                    key={chart.type}
-                                    type={chart.type} 
-                                    expenseList={chart.list}
-                                />
-                            ))}
-                        </div>
                     )}
                 </div>
 

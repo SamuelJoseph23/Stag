@@ -8,7 +8,7 @@ import {
     calculateFicaTax,
     getGrossIncome,
     getPreTaxExemptions,
-    getUnearnedIncome,
+    getFicaExemptions,
     getEarnedIncome,
     getPostTaxExemptions,
     getItemizedDeductions,
@@ -16,13 +16,14 @@ import {
 } from "../../components/Taxes/TaxService";
 import { CurrencyInput } from "../../components/Layout/CurrencyInput";
 
+// Suggestion: Create a 'useTax' hook in TaxContext.tsx that handles the null check
+// and throws an error if the provider is missing.
+
 export default function TaxesTab() {
     const { incomes } = useContext(IncomeContext);
     const { expenses } = useContext(ExpenseContext);
-    const taxCtx = useContext(TaxContext);
+    const { state, dispatch } = useContext(TaxContext);
 
-    if (!taxCtx) return null;
-    const { state, dispatch } = taxCtx;
     const currentYear = 2025;
 
     // 1. Calculate Base Totals
@@ -36,23 +37,12 @@ export default function TaxesTab() {
     
     const expenseAboveLineDeductions = getYesDeductions(expenses);
     const totalPreTaxDeductions = incomePreTaxDeductions + expenseAboveLineDeductions;
-    const ficaExemptions = getUnearnedIncome(incomes);
+    const ficaExemptions = getFicaExemptions(incomes);
 
     // Standard vs Itemized Logic
-    const itemizedTotal = getItemizedDeductions(expenses);
-    const fedStandardDeduction = fedParams.standardDeduction;
-    const fedAppliedMainDeduction =
-        state.deductionMethod === "Standard" ? fedStandardDeduction : itemizedTotal;
+    var itemizedTotal = getItemizedDeductions(expenses);
 
     // 3. Tax Calculations
-    const federalTax = state.fedOverride !== null 
-        ? state.fedOverride 
-        : calculateTax(annualGross, totalPreTaxDeductions, { ...fedParams, standardDeduction: fedAppliedMainDeduction });
-
-    const ficaTax = state.ficaOverride !== null 
-        ? state.ficaOverride 
-        : calculateFicaTax(earnedIncome, ficaExemptions, fedParams);
-
     const stateParams = TAX_DATABASE.states[state.stateResidency]?.[currentYear]?.[state.filingStatus];
     const stateStandardDeduction = stateParams?.standardDeduction || 0;
     const stateAppliedMainDeduction =
@@ -61,6 +51,20 @@ export default function TaxesTab() {
     const stateTax = state.stateOverride !== null 
         ? state.stateOverride 
         : (stateParams ? calculateTax(annualGross, totalPreTaxDeductions, { ...stateParams, standardDeduction: stateAppliedMainDeduction }) : 0);
+    
+    itemizedTotal += stateTax
+
+    const fedStandardDeduction = fedParams.standardDeduction;
+    const fedAppliedMainDeduction =
+        state.deductionMethod === "Standard" ? fedStandardDeduction : itemizedTotal;
+
+    const federalTax = state.fedOverride !== null 
+        ? state.fedOverride 
+        : calculateTax(annualGross, totalPreTaxDeductions, { ...fedParams, standardDeduction: fedAppliedMainDeduction });
+
+    const ficaTax = state.ficaOverride !== null 
+        ? state.ficaOverride 
+        : calculateFicaTax(earnedIncome, ficaExemptions, fedParams);
 
     const totalTax = federalTax + stateTax + ficaTax;
     
@@ -215,7 +219,19 @@ export default function TaxesTab() {
                                 {incomePreTaxDeductions > 0 && (
                                     <div className="flex justify-between text-blue-400 text-sm italic items-center">
                                         <span>Pre-Tax Deductions (401k/Ins)</span>
-                                        <span className="font-mono">-${incomePreTaxDeductions.toLocaleString()}</span>
+                                        <span className="font-mono">-${totalPreTaxDeductions.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                {(state.deductionMethod === "Itemized" && itemizedTotal > 0) && (
+                                    <div className="flex justify-between text-blue-400 text-sm italic items-center">
+                                        <span>Itemized Deductions (Exepenses)</span>
+                                        <span className="font-mono">-${itemizedTotal.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                {(state.deductionMethod === "Standard") && (
+                                    <div className="flex justify-between text-blue-400 text-sm italic items-center">
+                                        <span>Standard Deduction</span>
+                                        <span className="font-mono">-${fedStandardDeduction.toLocaleString()}</span>
                                     </div>
                                 )}
                                 

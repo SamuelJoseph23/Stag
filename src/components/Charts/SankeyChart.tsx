@@ -9,7 +9,7 @@ import {
     getGrossIncome, 
     getEarnedIncome,
     getPreTaxExemptions,
-    getUnearnedIncome
+    getFicaExemptions
 } from '../Taxes/TaxService';
 
 interface SankeyChartProps {
@@ -57,7 +57,7 @@ export const SankeyChart = ({ incomes, expenses, taxState }: SankeyChartProps) =
         
         // 2. Deduction Calculations
         const preTaxDeductions = getPreTaxExemptions(incomes); 
-        const ficaExemptions = getUnearnedIncome(incomes);    
+        const ficaExemptions = getFicaExemptions(incomes);    
 
         // 3. Tax Calculations
         const year = 2025;

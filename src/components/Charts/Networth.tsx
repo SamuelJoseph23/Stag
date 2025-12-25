@@ -5,7 +5,6 @@ import { DebtAccount, PropertyAccount } from '../Accounts/models';
 
 export const NetWorthCard = () => {
     const { accounts, amountHistory } = useContext(AccountContext);
-    const Line = ResponsiveLine as any;
     // 1. Calculate Current Stats
     const stats = useMemo(() => {
         let totalAssets = 0;
@@ -86,9 +85,9 @@ export const NetWorthCard = () => {
             {/* Historical Line Chart */}
             <div className="h-48 w-full mt-2">
                 {chartData[0].data.length > 1 ? (
-                    <Line
+                    <ResponsiveLine
                         data={chartData}
-                        margin={{ top: 10, right: 10, bottom: 25, left: 0 }}
+                        margin={{ top: 0, right: 15, bottom: 20, left: 15 }}
                         xScale={{
                             type: 'time',
                             format: '%Y-%m-%d',
@@ -98,21 +97,20 @@ export const NetWorthCard = () => {
                         yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
                         axisBottom={{
                             tickSize: 0,
-                            tickPadding: 10,
+                            tickPadding: 5,
                             format: '%b %d',
-                            tickValues: 5,
+                            tickValues: 6,
                         }}
                         enableGridX={false}
                         enableGridY={false}
                         colors={['#10b981']}
                         lineWidth={3}
+                        axisLeft={null}
                         
                         // --- Points Configuration ---
                         enablePoints={true}
-                        pointSize={0} // Invisible by default
-                        activePointSize={12} // Pops up on hover
-                        useMesh={true} // Required for the hover effect
-                        
+                        pointSize={6}
+                        useMesh={true} 
                         enableArea={true}
                         areaOpacity={0.1}
                         theme={{
@@ -131,9 +129,12 @@ export const NetWorthCard = () => {
                         )}
                     />
                 ) : (
-                    <div className="h-full w-full flex items-center justify-center border border-dashed border-gray-800 rounded-xl text-gray-600 text-xs italic">
-                        Not enough history to display chart
-                    </div>
+                    <div className='flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-gray-800 rounded-2xl'>
+                        <div className="text-gray-500 text-lg mb-2">No account history available</div>
+                        <p className="text-gray-600 text-sm max-w-xs">
+                        The Line chart requires account history to visualize your networth over time.
+                        </p>
+                  </div>
                 )}
             </div>
 

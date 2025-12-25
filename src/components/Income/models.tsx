@@ -46,10 +46,9 @@ export class SocialSecurityIncome extends BaseIncome {
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
     end_date: Date,
-    earned_income: "Yes" | "No",
     public claimingAge: number
   ) {
-    super(id, name, amount, frequency, end_date, earned_income);
+    super(id, name, amount, frequency, end_date, "No");
   }
 }
 
@@ -74,8 +73,7 @@ export class WindfallIncome extends BaseIncome {
     amount: number,
     frequency: 'Weekly' | 'Monthly' | 'Annually',
     end_date: Date,
-    earned_income: "Yes" | "No",
-    public receipt_date: Date
+    earned_income: "Yes" | "No"
   ) {
     super(id, name, amount, frequency, end_date, earned_income);
   }

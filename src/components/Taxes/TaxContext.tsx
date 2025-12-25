@@ -4,7 +4,7 @@ import { FilingStatus } from './TaxData';
 
 export type DeductionMethod = 'Standard' | 'Itemized';
 
-interface TaxState {
+export interface TaxState {
   filingStatus: FilingStatus;
   stateResidency: string;
   deductionMethod: DeductionMethod;
@@ -44,7 +44,17 @@ const taxReducer = (state: TaxState, action: Action): TaxState => {
   }
 };
 
-export const TaxContext = createContext<{ state: TaxState; dispatch: React.Dispatch<Action> } | undefined>(undefined);
+interface TaxContextProps {
+    state: TaxState;
+    dispatch: React.Dispatch<Action>;
+}
+
+
+export const TaxContext = createContext<TaxContextProps>({
+    state: initialState,
+    dispatch: () => null,
+});
+
 
 export const TaxProvider = ({ children }: { children: ReactNode }) => {
   // FIXED: Pass taxReducer as the first argument

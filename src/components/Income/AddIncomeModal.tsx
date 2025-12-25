@@ -7,6 +7,9 @@ import {
   WindfallIncome
 } from './models';
 import { CurrencyInput } from "../Layout/CurrencyInput";
+import { NameInput } from "../Layout/NameInput";
+import { DropdownInput } from "../Layout/DropdownInput";
+import { NumberInput } from "../Layout/NumberInput";
 
 const generateUniqueId = () =>
     `INC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -26,14 +29,14 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     
     // --- New Deductions State ---
+    const [earnedIncome, setEarnedIncome] = useState<'Yes' | 'No'>('Yes');
     const [preTax401k, setPreTax401k] = useState<number>(0);
     const [insurance, setInsurance] = useState<number>(0);
     const [roth401k, setRoth401k] = useState<number>(0);
     
     // --- Other Fields ---
     const [claimingAge, setClaimingAge] = useState<number>(62);
-    const [sourceType] = useState<string>('Dividend');
-    const [receiptDate] = useState(new Date().toISOString().split('T')[0]);
+    const [sourceType, setSourceType] = useState<string>('Dividend');
     
     const handleClose = () => {
         setStep('select');
@@ -70,11 +73,11 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
         if (selectedType === WorkIncome) {
             newIncome = new WorkIncome(id, name.trim(), amount, frequency, finalEndDate, "Yes", preTax401k, insurance, roth401k);
         } else if (selectedType === SocialSecurityIncome) {
-            newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, "Yes", claimingAge);
+            newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, claimingAge);
         } else if (selectedType === PassiveIncome) {
             newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, "Yes", sourceType);
         } else if (selectedType === WindfallIncome) {
-            newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, "No", new Date(receiptDate));
+            newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, "No");
         } else {
              // Fallback
             newIncome = new selectedType(id, name.trim(), amount, frequency, finalEndDate, "Yes");
@@ -94,10 +97,10 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-                <h2 className="text-xl font-bold text-white mb-6 border-b border-gray-800 pb-3">
-                    {step === 'select' ? 'Select Income Type' : `New ${selectedType.name.replace('Income', '')}`}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm min-w-max">
+			<div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl max-h-md overflow-y-auto text-white">
+				<h2 className="text-xl font-bold mb-6 border-b border-gray-800 pb-3">
+                  {step === 'select' ? 'Select Income Type' : `New ${selectedType.name.replace('Income', '')}`}
                 </h2>
 
                 {step === 'select' ? (
@@ -114,66 +117,52 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">Name</label>
-                            <input 
-                                autoFocus 
-                                className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-                                value={name} 
-                                onChange={(e) => setName(e.target.value)} 
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <CurrencyInput label="Gross Amount" value={amount} onChange={setAmount} />
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-2">
+                                <NameInput label="Income Name" value={name} onChange={setName} />
+                            </div>
                             
-                            <div>
-                                <label className="block text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">Frequency</label>
-                                <div className="bg-gray-900 border border-gray-700 rounded-md px-3 py-2 h-[42px] flex items-center">
-                                    <select 
-                                        className="bg-transparent border-none outline-none text-white text-sm font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
-                                        value={frequency} 
-                                        onChange={(e) => setFrequency(e.target.value as any)}
-                                    >
-                                        <option value="Weekly" className="bg-gray-950">Weekly</option>
-                                        <option value="Monthly" className="bg-gray-950">Monthly</option>
-                                        <option value="Annually" className="bg-gray-950">Annually</option>
-                                    </select>
-                                </div>
+                            <div className="col-span-1">
+                                <DropdownInput
+                                    label="Frequency"
+                                    onChange={(val) => setFrequency(val as "Weekly" | "Monthly" | "Annually")}
+                                    options={["Weekly", "Monthly", "Annually"]}
+                                    value={frequency}
+                                />
                             </div>
                         </div>
 
-                        {selectedType === WorkIncome && (
-                            <div className="border-t border-gray-800 pt-4 mt-2">
-                                <label className="block text-xs text-gray-400 font-medium mb-3 uppercase tracking-wide">Deductions (Per Paycheck)</label>
-                                <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-4">
+                            <CurrencyInput label="Gross Amount" value={amount} onChange={setAmount} />
+                            {selectedType === WorkIncome && (
+                                <>
                                     <CurrencyInput label="Pre-Tax 401k/403b" value={preTax401k} onChange={setPreTax401k} />
                                     <CurrencyInput label="Medical/Dental/Vision" value={insurance} onChange={setInsurance} />
                                     <CurrencyInput label="Roth 401k (Post-Tax)" value={roth401k} onChange={setRoth401k} />
-                                </div>
+                                </>
+                            )}
+                            <div>
+                                <label className="block text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">End Date</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500 transition-colors h-[42px]"
+                                    value={endDate} 
+                                    onChange={(e) => setEndDate(e.target.value)} 
+                                />
                             </div>
-                        )}
+                            {selectedType === SocialSecurityIncome && (
+                                <NumberInput label="Claiming Age" value={claimingAge} onChange={setClaimingAge} />
+                            )}
+                            {selectedType === PassiveIncome && (
+                                <>
+                                    <DropdownInput label="Source Type" value={sourceType} onChange={(val) => setSourceType(val as "Dividend" | "Rental" | "Royalty" | "Other")} options={["Dividend", "Rental", "Royalty", "Other"]} />
+                                </>
+                            )}
+                            {selectedType !== SocialSecurityIncome && (
+                                <DropdownInput label="Earned Income" value={earnedIncome} onChange={(val) => setEarnedIncome(val as "Yes" | "No")} options={["Yes", "No"]} />
+                            )}
 
-                        <div>
-                            <label className="block text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">End Date</label>
-                            <input 
-                                type="date" 
-                                className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500 transition-colors h-[42px]"
-                                value={endDate} 
-                                onChange={(e) => setEndDate(e.target.value)} 
-                            />
                         </div>
-
-                        {/* Specific Fields for other types */}
-                        {selectedType === SocialSecurityIncome && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs text-gray-400 font-medium mb-0.5 uppercase tracking-wide">Claiming Age</label>
-                                    <input type="number" className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white text-sm" value={claimingAge} onChange={(e) => setClaimingAge(Number(e.target.value))} />
-                                </div>
-                            </div>
-                        )}
-                        {/* (Other types omitted for brevity, logic remains same as before) */}
                     </div>
                 )}
 

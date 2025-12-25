@@ -1,13 +1,6 @@
 import { useState, useContext } from "react";
 import { IncomeContext } from "../../components/Income/IncomeContext";
-import {
-	WorkIncome,
-	SocialSecurityIncome,
-	PassiveIncome,
-	WindfallIncome,
-} from "../../components/Income/models";
 import IncomeCard from "../../components/Income/IncomeCard";
-import IncomeHorizontalBarChart from "../../components/Income/IncomeHorizontalBarChart";
 import {
 	DragDropContext,
 	Droppable,
@@ -15,6 +8,7 @@ import {
 	DropResult,
 } from "@hello-pangea/dnd";
 import AddIncomeModal from "../../components/Income/AddIncomeModal";
+import IncomeIcicleChart from "../../components/Income/IncomeBarChart";
 
 // Updated IncomeList to handle the base class or specific filtering
 const IncomeList = () => {
@@ -84,25 +78,6 @@ const TabsContent = () => {
 	const { incomes } = useContext(IncomeContext);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	// Keep individual filters only for the charts
-	const workIncomes = incomes.filter((inc) => inc instanceof WorkIncome);
-	const ssIncomes = incomes.filter(
-		(inc) => inc instanceof SocialSecurityIncome
-	);
-	const passiveIncomes = incomes.filter((inc) => inc instanceof PassiveIncome);
-	const windfallIncomes = incomes.filter(
-		(inc) => inc instanceof WindfallIncome
-	);
-
-	const visibleCharts = [
-		{ type: "Work", list: workIncomes },
-		{ type: "Social Security", list: ssIncomes },
-		{ type: "Passive", list: passiveIncomes },
-		{ type: "Windfall", list: windfallIncomes },
-	].filter((item) => item.list.length > 0 && incomes.length > item.list.length);
-
-	const gridClass = visibleCharts.length > 1 ? "grid-cols-2" : "grid-cols-1";
-
 	return (
 		<div className="w-full min-h-full flex bg-gray-950 justify-center pt-6">
 			<div className="w-full px-8 max-w-screen-2xl">
@@ -112,21 +87,8 @@ const TabsContent = () => {
 						Income Breakdown
 					</h2>
 					{incomes.length > 0 && (
-						<IncomeHorizontalBarChart
-							type="Total Monthly Income"
-							incomeList={incomes}
+						<IncomeIcicleChart incomeList= {incomes}
 						/>
-					)}
-					{visibleCharts.length > 0 && (
-						<div className={`grid ${gridClass} gap-4 pt-2`}>
-							{visibleCharts.map((chart) => (
-								<IncomeHorizontalBarChart
-									key={chart.type}
-									type={chart.type}
-									incomeList={chart.list}
-								/>
-							))}
-						</div>
 					)}
 				</div>
 
