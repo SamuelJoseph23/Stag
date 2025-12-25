@@ -5,9 +5,10 @@ interface NumberInputProps {
     label: string;
     value: number;
     onChange: (val: number) => void;
+    id?: string;
 }
 
-export const NumberInput: React.FC<NumberInputProps> = ({ label, value, onChange }) => {
+export const NumberInput: React.FC<NumberInputProps> = ({ label, value, onChange, id }) => {
     const [localValue, setLocalValue] = useState(value.toString());
 
     useEffect(() => {
@@ -48,6 +49,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({ label, value, onChange
 
     return (
         <StyledInput
+            id={id}
             label={label}
             type="text"
             value={localValue}

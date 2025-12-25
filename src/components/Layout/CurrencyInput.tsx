@@ -5,12 +5,13 @@ interface CurrencyInputProps {
     label: string;
     value: number;
     onChange: (val: number) => void;
+    id?: string;
 }
 
 const format = (val: number) => 
     val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export const CurrencyInput: React.FC<CurrencyInputProps> = ({ label, value, onChange }) => {
+export const CurrencyInput: React.FC<CurrencyInputProps> = ({ label, value, onChange, id }) => {
     // Local state for the string representation (e.g., "$1,200.50")
     const [displayValue, setDisplayValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
@@ -44,6 +45,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({ label, value, onCh
 
     return (
         <StyledInput
+            id={id}
             label={`${label} ($)`}
             type="text"
             value={isFocused ? displayValue : `$${displayValue}`}

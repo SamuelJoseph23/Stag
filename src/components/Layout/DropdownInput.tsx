@@ -11,16 +11,19 @@ interface DropdownInputProps {
     value: string;
     onChange: (newValue: string) => void;
     options: (string | Option)[];
+    id?: string;
 }
 
 const isOptionObject = (option: string | Option): option is Option => {
     return typeof option === 'object' && option !== null && 'value' in option && 'label' in option;
 }
 
-export const DropdownInput: React.FC<DropdownInputProps> = ({ label, value, onChange, options }) => {
+export const DropdownInput: React.FC<DropdownInputProps> = ({ label, value, onChange, options, id: providedId }) => {
+    const id = providedId || label.toLowerCase().replace(/\s/g, '-');
     return (
-        <InputGroup label={label}>
+        <InputGroup label={label} id={id}>
             <select
+                id={id}
                 className="bg-transparent border-none outline-none text-white text-md font-semibold w-full p-0 m-0 appearance-none cursor-pointer"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

@@ -37,6 +37,8 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
     // --- Other Fields ---
     const [claimingAge, setClaimingAge] = useState<number>(62);
     const [sourceType, setSourceType] = useState<string>('Dividend');
+        
+    const id = generateUniqueId();
     
     const handleClose = () => {
         setStep('select');
@@ -66,7 +68,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
     const handleAdd = () => {
         if (!name.trim() || !selectedType) return;
 
-        const id = generateUniqueId();
         const finalEndDate = new Date(endDate);
         let newIncome;
 
@@ -119,7 +120,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({ isOpen, onClose }) => {
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="col-span-2">
-                                <NameInput label="Income Name" value={name} onChange={setName} />
+                                <NameInput label="Income Name" id={id} value={name} onChange={setName} />
                             </div>
                             
                             <div className="col-span-1">

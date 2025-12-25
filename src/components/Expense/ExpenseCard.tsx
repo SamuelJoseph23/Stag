@@ -20,6 +20,7 @@ import { CurrencyInput } from "../Layout/CurrencyInput"; // Import new component
 import DeleteExpenseControl from './DeleteExpenseUI';
 import { PercentageInput } from "../Layout/PercentageInput";
 import { NumberInput } from "../Layout/NumberInput";
+import { NameInput } from "../Layout/NameInput";
 
 // Helper to format Date objects to YYYY-MM-DD
 const formatDate = (date: Date): string => {
@@ -150,15 +151,15 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 	return (
 		<div className="w-full">
 			<div className="flex gap-4 mb-4">
-				<div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}>
+				<div className={`w-8 h-8 mt-1 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}>
 					{getDescriptor().slice(0, 1)}
 				</div>
 				<div className="grow"> 
-					<input
-						type="text"
+					<NameInput 
+						label=""
+						id={expense.id}
 						value={expense.name}
-						onChange={(e) => handleFieldUpdate("name", e.target.value)}
-						className="text-xl font-bold text-white bg-transparent focus:outline-none focus:ring-1 focus:ring-green-300 rounded p-1 -m-1 w-full" 
+						onChange={(val) => handleFieldUpdate("name", val)}
 					/>
 				</div>
 				<div className="text-chart-Red-75 ml-auto">
@@ -174,6 +175,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 */}
 				{ !(expense instanceof MortgageExpense) && (
 					<CurrencyInput
+						id={`${expense.id}-amount`}
 						label={expense instanceof RentExpense ? "Rent/Mortgage Payment" : "Amount"}
 						value={expense instanceof RentExpense ? (expense as RentExpense).payment : expense.amount}
 						onChange={(val) => handleFieldUpdate(isHousing ? "payment" : "amount", val)}
@@ -187,6 +189,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 				)}
                 
                 <StyledSelect
+					id={`${expense.id}-frequency`}
                     label="Frequency"
                     value={expense.frequency}
                     onChange={(e) => handleFieldUpdate("frequency", e.target.value)}
@@ -196,6 +199,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 {/* --- Specialized Housing Fields --- */}
 				{expense instanceof RentExpense && (
 					<CurrencyInput
+						id={`${expense.id}-utilities`}
 						label="Utilities"
 						value={expense.utilities}
 						onChange={(val) => handleFieldUpdate("utilities", val)}
@@ -205,66 +209,79 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 				{(expense instanceof MortgageExpense) && (
 					<>
 						<CurrencyInput
+							id={`${expense.id}-valuation`}
 							label="Valuation"
 							value={expense.valuation}
 							onChange={(val) => handleFieldUpdate("valuation", val)}
 						/>
 						<CurrencyInput
+							id={`${expense.id}-loan-balance`}
 							label="Loan Balance"
 							value={expense.loan_balance}
 							onChange={(val) => handleFieldUpdate("loan_balance", val)}
 						/>
 						<PercentageInput
+							id={`${expense.id}-apr`}
 							label="APR (%)"
 							value={expense.apr}
 							onChange={(val) => handleFieldUpdate("apr", val)}
 						/>
 						<NumberInput
+							id={`${expense.id}-term-length`}
 							label="Term Length (years)"
 							value={expense.term_length}
 							onChange={(val) => handleFieldUpdate("term_length", val)}
 						/>
 						<PercentageInput
+							id={`${expense.id}-property-taxes`}
 							label="Property Taxes"
 							value={expense.property_taxes}
 							onChange={(val) => handleFieldUpdate("property_taxes", val)}
 						/>
 						<CurrencyInput
+							id={`${expense.id}-valuation-deduction`}
 							label="Valuation Deduction"
 							value={expense.valuation_deduction}
 							onChange={(val) => handleFieldUpdate("valuation_deduction", val)}
 						/>
 						<PercentageInput
+							id={`${expense.id}-maintenance`}
 							label="Maintenance"
 							value={expense.maintenance}
 							onChange={(val) => handleFieldUpdate("maintenance", val)}
 						/>
 						<CurrencyInput
+							id={`${expense.id}-utilities`}
 							label="Utilities"
 							value={expense.utilities}
 							onChange={(val) => handleFieldUpdate("utilities", val)}
 						/>
 						<PercentageInput
+							id={`${expense.id}-homeowners-insurance`}
 							label="Homeowners Insurance"
 							value={expense.home_owners_insurance}
 							onChange={(val) => handleFieldUpdate("home_owners_insurance", val)}
 						/>
 						<PercentageInput
+							id={`${expense.id}-pmi`}
 							label="PMI"
 							value={expense.pmi}
 							onChange={(val) => handleFieldUpdate("pmi", val)}
 						/>
 						<CurrencyInput
+							id={`${expense.id}-hoa-fee`}
 							label="HOA Fee"
 							value={expense.hoa_fee}
 							onChange={(val) => handleFieldUpdate("hoa_fee", val)}
 						/>
 						<CurrencyInput
+							id={`${expense.id}-extra-payment`}
 							label="Extra Payment"
 							value={expense.extra_payment}
 							onChange={(val) => handleFieldUpdate("extra_payment", val)}
 						/>
 						<StyledSelect 
+							id={`${expense.id}-tax-deductible`}
 							label="Tax Deductible" 
 							value={expense.is_tax_deductible} 
 							onChange={(e) => handleFieldUpdate("is_tax_deductible", e.target.value)} 
@@ -289,23 +306,27 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
                 {expense instanceof LoanExpense && (
 					<>
 						<StyledInput 
+							id={`${expense.id}-apr`}
 							label="APR (%)" 
 							type="number" 
 							value={expense.apr} 
 							onChange={(e) => handleFieldUpdate("apr", Number(e.target.value))} 
 						/>
 						<StyledSelect 
+							id={`${expense.id}-interest-type`}
 							label="Interest Type" 
 							value={expense.interest_type} 
 							onChange={(e) => handleFieldUpdate("interest_type", e.target.value)} 
 							options={["Simple", "Compounding"]} 
 						/>
 						<CurrencyInput
+							id={`${expense.id}-payment`}
 							label="Payment"
 							value={expense.payment}
 							onChange={(val) => handleFieldUpdate("payment", val)}
 						/>
 						<StyledSelect 
+							id={`${expense.id}-tax-deductible`}
 							label="Tax Deductible" 
 							value={expense.is_tax_deductible} 
 							onChange={(e) => handleFieldUpdate("is_tax_deductible", e.target.value)} 
@@ -313,6 +334,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 						/>
 						{(expense.is_tax_deductible === 'Yes' || expense.is_tax_deductible === 'Itemized') && (
 							<CurrencyInput
+								id={`${expense.id}-deductible-amount`}
 								label="Deductible Amount"
 								value={expense.tax_deductible}
 								onChange={(val) => handleFieldUpdate("tax_deductible", val)}
@@ -324,12 +346,14 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 				{expense instanceof DependentExpense && (
 					<>
 						<StyledInput 
+							id={`${expense.id}-end-date`}
 							label="End Date" 
 							type="date" 
 							value={formatDate(expense.end_date)} 
 							onChange={(e) => handleDateChange("end_date", e.target.value)} 
 						/>
 						<StyledSelect 
+							id={`${expense.id}-tax-deductible`}
 							label="Tax Deductible" 
 							value={expense.is_tax_deductible} 
 							onChange={(e) => handleFieldUpdate("is_tax_deductible", e.target.value)} 
@@ -337,6 +361,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 						/>
 						{(expense.is_tax_deductible === 'Yes' || expense.is_tax_deductible === 'Itemized') && (
 							<CurrencyInput
+								id={`${expense.id}-deductible-amount`}
 								label="Deductible Amount"
 								value={expense.tax_deductible}
 								onChange={(val) => handleFieldUpdate("tax_deductible", val)}
@@ -348,6 +373,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 				{expense instanceof DependentExpense && (
 					<>
 						<StyledSelect 
+							id={`${expense.id}-tax-deductible-2`}
 							label="Tax Deductible" 
 							value={expense.is_tax_deductible} 
 							onChange={(e) => handleFieldUpdate("is_tax_deductible", e.target.value)} 
@@ -355,6 +381,7 @@ const ExpenseCard = ({ expense }: { expense: AnyExpense }) => {
 						/>
 						{(expense.is_tax_deductible === 'Yes' || expense.is_tax_deductible === 'Itemized') && (
 							<CurrencyInput
+								id={`${expense.id}-deductible-amount-2`}
 								label="Deductible Amount"
 								value={expense.tax_deductible}
 								onChange={(val) => handleFieldUpdate("tax_deductible", val)}

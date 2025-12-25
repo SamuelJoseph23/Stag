@@ -11,6 +11,7 @@ import { IncomeContext, AllIncomeKeys } from "./IncomeContext";
 import { StyledInput, StyledSelect } from "../Layout/StyleUI";
 import { CurrencyInput } from "../Layout/CurrencyInput"; // Import new component
 import DeleteIncomeControl from './DeleteIncomeUI';
+import { NameInput } from "../Layout/NameInput";
 
 // Helper to format Date objects to YYYY-MM-DD for input fields
 const formatDate = (date: Date): string => {
@@ -58,17 +59,15 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 	return (
 		<div className="w-full">
 			<div className="flex gap-4 mb-4">
-				<div
-					className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}
-				>
+				<div className={`w-8 h-8 mt-1 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}>
 					{getDescriptor().slice(0, 1)}
 				</div>
 				<div className="grow"> 
-					<input
-						type="text"
+					<NameInput 
+						label=""
+						id={income.id}
 						value={income.name}
-						onChange={(e) => handleFieldUpdate("name", e.target.value)}
-						className="text-xl font-bold text-white bg-transparent focus:outline-none focus:ring-1 focus:ring-green-300 rounded p-1 -m-1 w-full" 
+						onChange={(val) => handleFieldUpdate("name", val)}
 					/>
 				</div>
 				<div className="text-chart-Red-75 ml-auto">
@@ -79,12 +78,14 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
                 {/* Simplified Currency Input */}
                 <CurrencyInput
+					id={`${income.id}-amount`}
                     label="Amount"
                     value={income.amount}
                     onChange={(val) => handleFieldUpdate("amount", val)}
                 />
                 
                 <StyledSelect
+					id={`${income.id}-frequency`}
                     label="Frequency"
                     value={income.frequency}
                     onChange={(e) => handleFieldUpdate("frequency", e.target.value)}
@@ -93,6 +94,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 
 				{!(income instanceof SocialSecurityIncome) && (
 					<StyledSelect
+						id={`${income.id}-earned-income`}
 						label="Earned Income"
 						value={income.earned_income}
 						onChange={(e) => handleFieldUpdate("earned_income", e.target.value)}
@@ -102,6 +104,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 
 				{income instanceof WorkIncome && (
 					<CurrencyInput
+						id={`${income.id}-pre-tax-contributions`}
 						label="Pre-Tax Contributions"
 						value={income.preTax401k}
 						onChange={(val) => handleFieldUpdate("preTax401k", val)}
@@ -111,6 +114,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 
 				{income instanceof WorkIncome && (
 					<CurrencyInput
+						id={`${income.id}-insurance`}
 						label="Insurance"
 						value={income.insurance}
 						onChange={(val) => handleFieldUpdate("insurance", val)}
@@ -120,6 +124,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 
 				{income instanceof WorkIncome && (
 					<CurrencyInput
+						id={`${income.id}-roth-contributions`}
 						label="Roth Contributions"
 						value={income.roth401k}
 						onChange={(val) => handleFieldUpdate("roth401k", val)}
@@ -129,6 +134,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 				
 				{income instanceof SocialSecurityIncome && (
 					<StyledInput
+						id={`${income.id}-claiming-age`}
 						label="Claiming Age"
 						type="number"
 						value={income.claimingAge}
@@ -138,6 +144,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
 
                 {income instanceof PassiveIncome && (
                     <StyledSelect
+						id={`${income.id}-source-type`}
                         label="Source Type"
                         value={income.sourceType}
                         onChange={(e) => handleFieldUpdate("sourceType", e.target.value)}
@@ -145,6 +152,7 @@ const IncomeCard = ({ income }: { income: AnyIncome }) => {
                     />
                 )}
 				<StyledInput 
+					id={`${income.id}-end-date`}
 					label="End Date" 
 					type="date" 
 					value={formatDate(income.end_date)} 

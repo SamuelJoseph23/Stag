@@ -5,12 +5,13 @@ interface PercentageInputProps {
     label: string;
     value: number;
     onChange: (val: number) => void;
+    id?: string;
 }
 
 const format = (val: number) => 
     val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export const PercentageInput: React.FC<PercentageInputProps> = ({ label, value, onChange }) => {
+export const PercentageInput: React.FC<PercentageInputProps> = ({ label, value, onChange, id }) => {
     // Local state for the string representation (e.g., "12.50")
     const [displayValue, setDisplayValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
@@ -52,6 +53,7 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({ label, value, 
 
     return (
         <StyledInput
+            id={id}
             label={`${label} (%)`}
             type="text"
             value={isFocused ? displayValue : `${displayValue}%`}

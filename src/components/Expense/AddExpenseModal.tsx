@@ -58,6 +58,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	const [extraPayment, setExtraPayment] = useState<number>(0);
 	const [isTaxDeductible, setIsTaxDeductible] = useState<"Yes" | "No" | 'Itemized'>("No");
 	const [taxDeductibleAmount, setTaxDeductibleAmount] = useState<number>(0);
+	const id = generateUniqueId();
 
 	const handleClose = () => {
 		setStep("select");
@@ -84,7 +85,6 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 	const handleAdd = () => {
 		if (!name.trim() || !selectedType) return;
 
-		const id = generateUniqueId();
 		const finalEndDate = new Date(endDate);
 
 		let newExpense;
@@ -225,11 +225,12 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 						{/* Name */}
 						<div className="grid grid-cols-3 gap-4">
 							<div className="col-span-2">
-								<NameInput label="Expense Name" value={name} onChange={setName} />
+								<NameInput label="Expense Name" id={id} value={name} onChange={setName} />
 							</div>
 							<div className="col-span-1">
                             <DropdownInput
                                 label="Frequency"
+                                id={`${id}-frequency`}
                                 value={frequency}
                                 onChange={(val) => setFrequency(val as any)}
                                 options={["Daily", "Weekly", "Monthly", "Annually"]}
@@ -241,6 +242,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 						<div className="grid grid-cols-3 gap-4">
                             {(!(selectedType === RentExpense || selectedType === MortgageExpense || selectedType === LoanExpense)) && (
 								<CurrencyInput
+									id={`${id}-amount`}
 									label="Amount"
 									value={amount}
 									onChange={setAmount}
@@ -248,6 +250,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 							)}
 							{((selectedType === LoanExpense)) && (
 								<CurrencyInput
+									id={`${id}-balance`}
 									label="Balance"
 									value={amount}
 									onChange={setAmount}
@@ -256,26 +259,27 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
 							{selectedType === RentExpense && (
 								<>
-									<CurrencyInput label="Rent Payment" value={payment} onChange={setPayment} />
-									<CurrencyInput label="Utilities" value={utilities} onChange={setUtilities} />
+									<CurrencyInput id={`${id}-rent-payment`} label="Rent Payment" value={payment} onChange={setPayment} />
+									<CurrencyInput id={`${id}-utilities`} label="Utilities" value={utilities} onChange={setUtilities} />
 								</>
 							)}
 
 							{selectedType === MortgageExpense && (
 								<>	
-									<CurrencyInput label="Valuation" value={valuation} onChange={setValuation} />
-									<CurrencyInput label="Loan Balance" value={loanBalance} onChange={setLoanBalance} />
-									<PercentageInput label="APR" value={apr} onChange={setApr}/>
-									<NumberInput label="Term Length (years)" value={termLength} onChange={setTermLength} />
-									<PercentageInput label="Property Tax Rate" value={propertyTaxes} onChange={setPropertyTaxes}/>
-									<CurrencyInput label="Valuation Deduction" value={valuationDeduction} onChange={setValuationDeduction} />
-									<PercentageInput label="Maintenance" value={maintenance} onChange={setMaintenance} />
-									<CurrencyInput label="Utilities" value={utilities} onChange={setUtilities} />
-									<PercentageInput label="Homeowners Insurance" value={homeOwnersInsurance} onChange={setHomeOwnersInsurance} />
-									<PercentageInput label="PMI" value={pmi} onChange={setPmi} />
-									<CurrencyInput label="HOA Fee" value={hoaFee} onChange={setHoaFee} />
-									<CurrencyInput label="Extra Payment" value={extraPayment} onChange={setExtraPayment} />
+									<CurrencyInput id={`${id}-valuation`} label="Valuation" value={valuation} onChange={setValuation} />
+									<CurrencyInput id={`${id}-loan-balance`} label="Loan Balance" value={loanBalance} onChange={setLoanBalance} />
+									<PercentageInput id={`${id}-apr`} label="APR" value={apr} onChange={setApr}/>
+									<NumberInput id={`${id}-term-length`} label="Term Length (years)" value={termLength} onChange={setTermLength} />
+									<PercentageInput id={`${id}-property-tax-rate`} label="Property Tax Rate" value={propertyTaxes} onChange={setPropertyTaxes}/>
+									<CurrencyInput id={`${id}-valuation-deduction`} label="Valuation Deduction" value={valuationDeduction} onChange={setValuationDeduction} />
+									<PercentageInput id={`${id}-maintenance`} label="Maintenance" value={maintenance} onChange={setMaintenance} />
+									<CurrencyInput id={`${id}-utilities`} label="Utilities" value={utilities} onChange={setUtilities} />
+									<PercentageInput id={`${id}-homeowners-insurance`} label="Homeowners Insurance" value={homeOwnersInsurance} onChange={setHomeOwnersInsurance} />
+									<PercentageInput id={`${id}-pmi`} label="PMI" value={pmi} onChange={setPmi} />
+									<CurrencyInput id={`${id}-hoa-fee`} label="HOA Fee" value={hoaFee} onChange={setHoaFee} />
+									<CurrencyInput id={`${id}-extra-payment`} label="Extra Payment" value={extraPayment} onChange={setExtraPayment} />
 									<DropdownInput
+										id={`${id}-tax-deductible`}
 										label="Tax Deductible"
 										value={isTaxDeductible}
 										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
@@ -286,24 +290,26 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
 							{selectedType === LoanExpense && (
 								<>
-									<PercentageInput label="APR" value={apr} onChange={setApr}/>
+									<PercentageInput id={`${id}-apr`} label="APR" value={apr} onChange={setApr}/>
 									<DropdownInput
+										id={`${id}-interest-type`}
 										label="Interest Type"
 										value={interestType}
 										onChange={(val) => setInterestType(val as "Compounding" | "Simple")}
 										options={["Simple", "Compounding"]}
 									/>
 									
-									<CurrencyInput label="Payment" value={payment} onChange={setPayment} />
+									<CurrencyInput id={`${id}-payment`} label="Payment" value={payment} onChange={setPayment} />
 									
 									<DropdownInput
+										id={`${id}-tax-deductible`}
 										label="Tax Deductible"
 										value={isTaxDeductible}
 										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
 										options={["No", "Yes", "Itemized"]}
 									/>
 									{(isTaxDeductible === "Yes" || isTaxDeductible === "Itemized") && (
-										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput id={`${id}-deductible-amount`} label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
 								</>
 							)}
@@ -311,13 +317,14 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 							{selectedType === HealthcareExpense && (
 								<>
 									<DropdownInput
+										id={`${id}-tax-deductible`}
 										label="Tax Deductible"
 										value={isTaxDeductible}
 										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
 										options={["No", "Yes", "Itemized"]}
 									/>
 									{(isTaxDeductible === "Yes" || isTaxDeductible === "Itemized") && (
-										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput id={`${id}-deductible-amount`} label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
 								</>
 							)}
@@ -336,13 +343,14 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 										/>
 									</div>
 									<DropdownInput
+										id={`${id}-tax-deductible`}
 										label="Tax Deductible"
 										value={isTaxDeductible}
 										onChange={(val) => setIsTaxDeductible(val as "Yes" | "No" | "Itemized")}
 										options={["Yes", "No", "Itemized"]}
 									/>
 									{isTaxDeductible === "Yes" && (
-										<CurrencyInput label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
+										<CurrencyInput id={`${id}-deductible-amount`} label="Deductible Amount" value={taxDeductibleAmount} onChange={setTaxDeductibleAmount} />
 									)}
 								</>
 							)}

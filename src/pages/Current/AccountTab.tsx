@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react"; // Added useRef
+import React, { useState, useContext, useRef, useEffect } from "react"; // Added useRef
 import { AccountContext } from "../../components/Accounts/AccountContext";
 import {
     SavedAccount,
@@ -75,11 +75,17 @@ const AccountList = ({ type }: { type: any }) => {
 const TabsContent = () => {
     const { accounts } = useContext(AccountContext);
     const { handleGlobalExport, handleGlobalImport } = useFileManager();
-    const [activeTab, setActiveTab] = useState<string>("Saved");
+    const [activeTab, setActiveTab] = useState<string>(() => {
+        return localStorage.getItem('account_active_tab') || 'Saved';
+    });
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     // Ref for the hidden file input
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        localStorage.setItem('account_active_tab', activeTab);
+    }, [activeTab]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

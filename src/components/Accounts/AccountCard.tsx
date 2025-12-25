@@ -6,6 +6,7 @@ import { StyledSelect, StyledDisplay } from "../Layout/StyleUI";
 import { CurrencyInput } from "../Layout/CurrencyInput"; // Import your new component
 import DeleteAccountControl from '../../components/Accounts/DeleteAccountUI';
 import { EditHistoryModal } from "./EditHistoryModal";
+import { NameInput } from "../Layout/NameInput";
 
 const AccountCard = ({ account }: { account: AnyAccount }) => {
 	const { dispatch: accountDispatch } = useContext(AccountContext);
@@ -88,16 +89,16 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 	return (
 		<div className="w-full">
 			<div className="flex gap-4 mb-4">
-				<div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}>
+				<div className={`w-8 h-8 mt-1 rounded-full flex items-center justify-center shadow-lg ${getIconBg()} text-md font-bold text-white`}>
 					{getDescriptor().slice(0, 1)}
 				</div>
 				<div className="grow"> 
-					<input
-						type="text"
-						value={account.name}
-						onChange={(e) => handleFieldUpdate("name", e.target.value)}
-						className="text-xl font-bold text-white bg-transparent focus:outline-none focus:ring-1 focus:ring-green-300 rounded p-1 -m-1 w-full" 
-					/>
+					<NameInput 
+                        label=""
+						id={account.id}
+                        value={account.name}
+                        onChange={(val) => handleFieldUpdate("name", val)}
+                    />
 				</div>
 				<div className="flex items-center gap-2 ml-auto">
                     <button 
@@ -115,6 +116,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#18181b] p-6 rounded-xl border border-gray-800">
 				<CurrencyInput
+					id={`${account.id}-amount`}
 					label="Current Amount"
 					value={account.amount}
 					onChange={(val) => handleFieldUpdate("amount", val)}
@@ -122,6 +124,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 
 				{account instanceof InvestedAccount && (
 					<CurrencyInput
+						id={`${account.id}-non-vested-amount`}
 						label="Non-Vested Contrib."
 						value={account.NonVestedAmount}
 						onChange={(val) => handleFieldUpdate("NonVestedAmount", val)}
@@ -131,6 +134,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 				{account instanceof PropertyAccount && (
 					<>
 						<StyledSelect
+							id={`${account.id}-status`}
 							label="Status"
 							value={account.ownershipType}
 							onChange={(e) => handleFieldUpdate("ownershipType", e.target.value)}
@@ -138,6 +142,7 @@ const AccountCard = ({ account }: { account: AnyAccount }) => {
 						/>
 						{account.ownershipType === "Financed" && (
 							<CurrencyInput
+								id={`${account.id}-loan-amount`}
 								label="Loan Amount"
 								value={account.loanAmount}
 								onChange={(val) => handleFieldUpdate("loanAmount", val)}

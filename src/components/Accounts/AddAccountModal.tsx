@@ -34,6 +34,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
     const [NonVestedAmount, setNonVestedAmount] = useState<number>(0);
     const [ownershipType, setOwnershipType] = useState<'Financed' | 'Owned'>('Owned');
     const [loanAmount, setLoanAmount] = useState<number>(0);
+    const id = generateUniqueAccId();
 
     const handleClose = () => {
         setName("");
@@ -47,7 +48,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
     const handleAdd = () => {
         if (!name.trim() || !selectedType) return;
 
-        const id = generateUniqueAccId();
         let newAccount;
 
         if (selectedType === SavedAccount) {
@@ -113,6 +113,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     <div>
                         <NameInput 
                             label="Account Name"
+                            id={id}
                             value={name}
                             onChange={setName}
                         />
@@ -121,11 +122,13 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     {selectedType === PropertyAccount && (
                         <div className="grid grid-cols-3 gap-4">
                             <CurrencyInput
+                                id={`${id}-amount`}
                                 label="Amount"
                                 value={amount}
                                 onChange={setAmount}
                             />
                             <DropdownInput
+                                id={`${id}-ownership-type`}
                                 label="Ownership Type"
                                 onChange={(val) => setOwnershipType(val as "Owned" | "Financed" | "Owned")}
                                 options={["Owned", "Financed"]}
@@ -133,6 +136,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                             />
                             {ownershipType == "Financed" && (
                                 <CurrencyInput
+                                    id={`${id}-loan-amount`}
                                     label="Loan Amount"
                                     value={loanAmount}
                                     onChange={setLoanAmount}
@@ -143,11 +147,13 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     {selectedType === InvestedAccount && (
                         <div className="grid grid-cols-3 gap-4">
                                 <CurrencyInput
+                                id={`${id}-amount`}
                                 label="Amount"
                                 value={amount}
                                 onChange={setAmount}
                             />
                             <CurrencyInput
+                                id={`${id}-non-vested-amount`}
                                 label="Non-Vested Contrib."
                                 value={NonVestedAmount}
                                 onChange={setNonVestedAmount}
@@ -157,6 +163,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     {!(selectedType === InvestedAccount || selectedType === PropertyAccount) && (
                         <div className="grid grid-cols-1 gap-4">
                             <CurrencyInput
+                                id={`${id}-amount`}
                                 label="Amount"
                                 value={amount}
                                 onChange={setAmount}
