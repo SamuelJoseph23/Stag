@@ -1,15 +1,13 @@
-import { createContext, useReducer, ReactNode, useEffect, Dispatch } from 'react';
+import { createContext, useReducer, ReactNode, useEffect } from 'react';
 
 export interface AssumptionsState {
   macro: {
     inflationRate: number;       // e.g., 3.0
     healthcareInflation: number; // e.g., 5.0
-    educationInflation: number;  // e.g., 6.0
     taxBracketGrowth: boolean;   // usually true (pegged to inflation)
   };
   income: {
     salaryGrowth: number;        // e.g., 3.0
-    bonusRate: number;           // e.g., 10.0 (% of salary)
     socialSecurityStartAge: number;
   };
   expenses: {
@@ -19,12 +17,10 @@ export interface AssumptionsState {
   };
   investments: {
     returnRates: {
-      bull: number;   // e.g., 10.0
-      base: number;   // e.g., 7.0
-      bear: number;   // e.g., 2.0
+      ror: number;   // e.g., 10.0
     };
     fees: number;     // e.g., 0.15 (expense ratios)
-    withdrawalStrategy: 'FixedReal' | 'Percentage' | 'GuytonKlinger';
+    withdrawalStrategy: 'Fixed Real' | 'Percentage' | 'Guyton Klinger';
     withdrawalRate: number; // e.g., 4.0
   };
   demographics: {
@@ -37,12 +33,10 @@ export const defaultAssumptions: AssumptionsState = {
   macro: {
     inflationRate: 3.0,
     healthcareInflation: 5.0,
-    educationInflation: 6.0,
     taxBracketGrowth: true,
   },
   income: {
     salaryGrowth: 3.0,
-    bonusRate: 0,
     socialSecurityStartAge: 67,
   },
   expenses: {
@@ -51,9 +45,9 @@ export const defaultAssumptions: AssumptionsState = {
     rentInflation: 3.5,
   },
   investments: {
-    returnRates: { bull: 10, base: 7, bear: 4 },
+    returnRates: { ror: 7 },
     fees: 0.1,
-    withdrawalStrategy: 'FixedReal',
+    withdrawalStrategy: 'Fixed Real',
     withdrawalRate: 4.0,
   },
   demographics: {
@@ -101,7 +95,15 @@ const assumptionsReducer = (state: AssumptionsState, action: Action): Assumption
   }
 };
 
-export const AssumptionsContext = createContext<{ state: AssumptionsState; dispatch: Dispatch<Action> } | undefined>(undefined);
+interface AssumptionsContextProps {
+    state: AssumptionsState;
+    dispatch: React.Dispatch<Action>;
+}
+
+export const AssumptionsContext = createContext<AssumptionsContextProps>({
+  state: defaultAssumptions,
+  dispatch: () => null,
+})
 
 export const AssumptionsProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(assumptionsReducer, defaultAssumptions, (initial) => {

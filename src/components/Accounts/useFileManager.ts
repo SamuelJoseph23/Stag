@@ -3,6 +3,7 @@ import { AccountContext } from './AccountContext';
 import { IncomeContext } from '../Income/IncomeContext';
 import { ExpenseContext } from '../Expense/ExpenseContext';
 import { TaxContext } from '../Taxes/TaxContext';
+import { AssumptionsContext, AssumptionsState } from '../Assumptions/AssumptionsContext'; // Import AssumptionsContext and AssumptionsState
 import { AnyAccount } from './models';
 import { reconstituteAccount, AmountHistoryEntry } from './AccountContext';
 import { AnyIncome } from '../Income/models';
@@ -18,6 +19,7 @@ interface FullBackup {
     incomes: AnyIncome[];
     expenses: AnyExpense[];
     taxSettings: TaxState;
+    assumptions: AssumptionsState; // Add assumptions to the FullBackup interface
 }
 
 export const useFileManager = () => {
@@ -25,6 +27,7 @@ export const useFileManager = () => {
     const { incomes, dispatch: incomeDispatch } = useContext(IncomeContext);
     const { expenses, dispatch: expenseDispatch } = useContext(ExpenseContext);
     const { state, dispatch: taxesDispatch } = useContext(TaxContext);
+    const { state: assumptions, dispatch: assumptionsDispatch } = useContext(AssumptionsContext); // Get assumptions state and dispatch
 
     const handleGlobalExport = () => {
         const fullBackup: FullBackup = {
@@ -34,6 +37,7 @@ export const useFileManager = () => {
             incomes: incomes.map(i => ({ ...i, className: i.constructor.name })),
             expenses: expenses.map(e => ({ ...e, className: e.constructor.name })),
             taxSettings: state as TaxState,
+            assumptions: assumptions as AssumptionsState, // Include assumptions in the backup
         };
 
         const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: 'application/json' });
@@ -57,6 +61,12 @@ export const useFileManager = () => {
             incomeDispatch({ type: 'SET_BULK_DATA', payload: { incomes: newIncomes } });
             expenseDispatch({ type: 'SET_BULK_DATA', payload: { expenses: newExpenses } });
             taxesDispatch({ type: 'SET_BULK_DATA', payload: data.taxSettings });
+            if (data.assumptions) { // Check if assumptions exist in the backup data
+                assumptionsDispatch({ type: 'SET_BULK_DATA', payload: data.assumptions });
+            }
+            else {
+                assumptionsDispatch({ type: 'RESET_DEFAULTS'});
+            }
         } catch (e) {
             console.error(e);
             alert("Error importing backup. Please check file format.");

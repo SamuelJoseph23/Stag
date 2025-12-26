@@ -6,7 +6,7 @@ type TopBarProps = {
 export default function TopBar({setIsOpen, title}: TopBarProps ) {
 	return (
 		<div
-			className={`w-full text-white bg-gray-900 transition-all duration-300 flex flex-row gap-2`}
+			className={`w-full text-white h-10 bg-gray-900 transition-all duration-300 flex flex-row gap-2`}
 		>
 			<button
                 onClick={() => setIsOpen(prev => !prev)}
