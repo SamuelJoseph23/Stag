@@ -5,7 +5,12 @@
       "Bash(npm test:*)",
       "Bash(npx tsc -b)",
       "Bash(npm run test:coverage:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run test:*)",
+      "WebFetch(domain:playwright.dev)"
     ]
   }
 }
