@@ -4,7 +4,8 @@
       "Bash(npm run coverage:*)",
       "Bash(npm test:*)",
       "Bash(npx tsc -b)",
-      "Bash(npm run test:coverage:*)"
+      "Bash(npm run test:coverage:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }
