@@ -16,7 +16,9 @@
       "Bash(ls:*)",
       "WebSearch",
       "Bash(dir \"C:\\\\Users\\\\steel\\\\VSProjects\\\\Stag\\\\*.md\")",
-      "Bash(npx xlsx-cli:*)"
+      "Bash(npx xlsx-cli:*)",
+      "Bash(gh issue list:*)",
+      "Bash(npm run test:ci:*)"
     ]
   }
 }
