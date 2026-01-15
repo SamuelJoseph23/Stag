@@ -10,7 +10,13 @@
       "Bash(npx tsc:*)",
       "Bash(npx ts-node:*)",
       "Bash(npm run test:*)",
-      "WebFetch(domain:playwright.dev)"
+      "WebFetch(domain:playwright.dev)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(ls:*)",
+      "WebSearch",
+      "Bash(dir \"C:\\\\Users\\\\steel\\\\VSProjects\\\\Stag\\\\*.md\")",
+      "Bash(npx xlsx-cli:*)"
     ]
   }
 }
