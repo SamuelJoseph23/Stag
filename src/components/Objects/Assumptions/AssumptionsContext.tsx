@@ -49,7 +49,7 @@ export interface AssumptionsState {
     gkAdjustmentPercent: number;  // Default 10 (10% cut/increase per GK rules)
     // Auto Roth conversions during retirement
     autoRothConversions: boolean; // Automatically convert Traditional to Roth in low-tax years
-    };
+  };
   demographics: {
     birthYear: number;
     retirementAge: number;
@@ -209,7 +209,8 @@ type Action =
   | { type: 'REMOVE_WITHDRAWAL_STRATEGY'; payload: string }
   | { type: 'UPDATE_WITHDRAWAL_STRATEGY'; payload: WithdrawalBucket }
   | { type: 'SET_PRIOR_EARNINGS'; payload: EarningsRecord[] }
-  | { type: 'CLEAR_PRIOR_EARNINGS' };
+  | { type: 'CLEAR_PRIOR_EARNINGS' }
+  | { type: 'RESET_ALL' };
 
 const assumptionsReducer = (state: AssumptionsState, action: Action): AssumptionsState => {
   switch (action.type) {
@@ -240,48 +241,50 @@ const assumptionsReducer = (state: AssumptionsState, action: Action): Assumption
         priorities: state.priorities,
         withdrawalStrategy: state.withdrawalStrategy,
       };
+    case 'RESET_ALL':
+      return defaultAssumptions;
     case 'SET_BULK_DATA':
       return action.payload;
     case 'SET_PRIORITIES':
-        return { ...state, priorities: action.payload };
+      return { ...state, priorities: action.payload };
     case 'ADD_PRIORITY':
-        return { ...state, priorities: [...state.priorities, action.payload] };
+      return { ...state, priorities: [...state.priorities, action.payload] };
     case 'REMOVE_PRIORITY':
-        return { ...state, priorities: state.priorities.filter(p => p.id !== action.payload) };
+      return { ...state, priorities: state.priorities.filter(p => p.id !== action.payload) };
     case 'UPDATE_PRIORITY':
-        return { 
-            ...state, 
-            priorities: state.priorities.map(p => p.id === action.payload.id ? action.payload : p) 
-        };
+      return {
+        ...state,
+        priorities: state.priorities.map(p => p.id === action.payload.id ? action.payload : p)
+      };
     case 'SET_WITHDRAWAL_STRATEGY':
-        return { ...state, withdrawalStrategy: action.payload };
+      return { ...state, withdrawalStrategy: action.payload };
     case 'ADD_WITHDRAWAL_STRATEGY':
-        return { ...state, withdrawalStrategy: [...state.withdrawalStrategy, action.payload] };
+      return { ...state, withdrawalStrategy: [...state.withdrawalStrategy, action.payload] };
     case 'REMOVE_WITHDRAWAL_STRATEGY':
-        return { ...state, withdrawalStrategy: state.withdrawalStrategy.filter(p => p.id !== action.payload) };
+      return { ...state, withdrawalStrategy: state.withdrawalStrategy.filter(p => p.id !== action.payload) };
     case 'UPDATE_WITHDRAWAL_STRATEGY':
-        return {
-            ...state,
-            withdrawalStrategy: state.withdrawalStrategy.map(p => p.id === action.payload.id ? action.payload : p)
-        };
+      return {
+        ...state,
+        withdrawalStrategy: state.withdrawalStrategy.map(p => p.id === action.payload.id ? action.payload : p)
+      };
     case 'SET_PRIOR_EARNINGS':
-        return {
-            ...state,
-            demographics: { ...state.demographics, priorEarnings: action.payload }
-        };
+      return {
+        ...state,
+        demographics: { ...state.demographics, priorEarnings: action.payload }
+      };
     case 'CLEAR_PRIOR_EARNINGS':
-        return {
-            ...state,
-            demographics: { ...state.demographics, priorEarnings: undefined }
-        };
+      return {
+        ...state,
+        demographics: { ...state.demographics, priorEarnings: undefined }
+      };
     default:
       return state;
   }
 };
 
 interface AssumptionsContextProps {
-    state: AssumptionsState;
-    dispatch: React.Dispatch<Action>;
+  state: AssumptionsState;
+  dispatch: React.Dispatch<Action>;
 }
 
 export const AssumptionsContext = createContext<AssumptionsContextProps>({

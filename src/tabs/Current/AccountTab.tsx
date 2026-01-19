@@ -24,7 +24,7 @@ import { QRGenerateModal, QRScanModal } from "../../components/Objects/Accounts/
 
 const AccountList = ({ type }: { type: any }) => {
     const { accounts, dispatch } = useContext(AccountContext);
-    
+
     const filteredAccounts = accounts
         .map((acc, index) => ({ acc, originalIndex: index }))
         .filter(({ acc }) => acc instanceof type);
@@ -47,9 +47,9 @@ const AccountList = ({ type }: { type: any }) => {
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="accounts-list">
                 {(provided) => (
-                    <div 
-                        {...provided.droppableProps} 
-                        ref={provided.innerRef} 
+                    <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
                         className="flex flex-col"
                     >
                         {filteredAccounts.map(({ acc }, index) => (
@@ -60,7 +60,7 @@ const AccountList = ({ type }: { type: any }) => {
                                         {...provided.draggableProps}
                                         className={`relative group pb-6 ${snapshot.isDragging ? 'z-50' : ''}`}
                                     >
-                                        <div 
+                                        <div
                                             {...provided.dragHandleProps}
                                             className="absolute -left-3 top-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-2 text-green-200"
                                         >
@@ -184,7 +184,7 @@ const TabsContent = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        
+
         // This is where the conversion happens from "File" to "String"
         reader.onload = (event) => {
             const result = event.target?.result;
@@ -200,14 +200,27 @@ const TabsContent = () => {
         e.target.value = '';
     };
 
+    const { clearAllScenarios } = useScenarios();
+
     const handleDeleteAllData = () => {
         // Clear all contexts
         accountDispatch({ type: 'SET_BULK_DATA', payload: { accounts: [], amountHistory: {} } });
         incomeDispatch({ type: 'SET_BULK_DATA', payload: { incomes: [] } });
         expenseDispatch({ type: 'SET_BULK_DATA', payload: { expenses: [] } });
-        taxDispatch({ type: 'SET_STATUS', payload: 'Single' }); // Reset to defaults
-        assumptionsDispatch({ type: 'RESET_DEFAULTS' });
+        taxDispatch({
+            type: 'SET_BULK_DATA', payload: {
+                filingStatus: 'Single' as FilingStatus,
+                stateResidency: 'DC',
+                deductionMethod: 'Auto' as DeductionMethod,
+                fedOverride: null,
+                ficaOverride: null,
+                stateOverride: null,
+                year: new Date().getFullYear() // Or use max_year if accessible
+            }
+        });
+        assumptionsDispatch({ type: 'RESET_ALL' });
         simulationDispatch({ type: 'SET_SIMULATION', payload: [] });
+        clearAllScenarios();
 
         // Close the modal
         setShowDeleteConfirm(false);
@@ -219,31 +232,31 @@ const TabsContent = () => {
         Cash: (
             <div className="p-4">
                 <AccountList type={SavedAccount} />
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-green-600 p-4 rounded-xl text-white font-bold mt-4 hover:bg-green-700 transition-colors"
                 >
                     + Add Cash
                 </button>
                 <AddAccountModal
-                    isOpen={isModalOpen} 
-                    onClose={() => setIsModalOpen(false)} 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
                     selectedType={SavedAccount}
-                />    
+                />
             </div>
         ),
         Invested: (
             <div className="p-4">
                 <AccountList type={InvestedAccount} />
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-green-600 p-4 rounded-xl text-white font-bold mt-4 hover:bg-green-700 transition-colors"
                 >
                     + Add Investment
                 </button>
                 <AddAccountModal
-                    isOpen={isModalOpen} 
-                    onClose={() => setIsModalOpen(false)} 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
                     selectedType={InvestedAccount}
                 />
             </div>
@@ -251,15 +264,15 @@ const TabsContent = () => {
         Property: (
             <div className="p-4">
                 <AccountList type={PropertyAccount} />
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-green-600 p-4 rounded-xl text-white font-bold mt-4 hover:bg-green-700 transition-colors"
                 >
                     + Add Property
                 </button>
                 <AddAccountModal
-                    isOpen={isModalOpen} 
-                    onClose={() => setIsModalOpen(false)} 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
                     selectedType={PropertyAccount}
                 />
             </div>
@@ -267,15 +280,15 @@ const TabsContent = () => {
         Debt: (
             <div className="p-4">
                 <AccountList type={DebtAccount} />
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-green-600 p-4 rounded-xl text-white font-bold mt-4 hover:bg-green-700 transition-colors"
                 >
                     + Add Debt
                 </button>
                 <AddAccountModal
-                    isOpen={isModalOpen} 
-                    onClose={() => setIsModalOpen(false)} 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
                     selectedType={DebtAccount}
                 />
             </div>
@@ -285,7 +298,7 @@ const TabsContent = () => {
     return (
         <div className="w-full min-h-full flex bg-gray-950 justify-center pt-6 pb-24">
             <div className="w-full px-4 sm:px-8 max-w-screen-2xl">
-                
+
                 <div className="space-y-4 mb-4 p-4 bg-gray-900 rounded-xl border border-gray-800">
                     {/* Header with Export/Import Buttons */}
                     <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
@@ -345,11 +358,10 @@ const TabsContent = () => {
                     {tabs.map((tab) => (
                         <button
                             key={tab}
-                            className={`flex-1 font-semibold p-3 transition-colors duration-200 ${
-                                activeTab === tab
+                            className={`flex-1 font-semibold p-3 transition-colors duration-200 ${activeTab === tab
                                     ? "text-green-300 bg-gray-900 border-b-2 border-green-300"
                                     : "text-gray-400 hover:bg-gray-900 hover:text-white"
-                            }`}
+                                }`}
                             onClick={() => setActiveTab(tab)}
                         >
                             {tab}

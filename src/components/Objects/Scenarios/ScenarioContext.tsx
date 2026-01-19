@@ -75,7 +75,7 @@ const scenarioReducer = (state: ScenarioState, action: ScenarioAction): Scenario
                 selectedComparison: state.selectedComparison === action.payload ? null : state.selectedComparison,
                 comparisonResult: state.comparisonResult &&
                     (state.comparisonResult.baseline.metadata.id === action.payload ||
-                     state.comparisonResult.comparison.metadata.id === action.payload)
+                        state.comparisonResult.comparison.metadata.id === action.payload)
                     ? null
                     : state.comparisonResult,
                 error: null
@@ -139,6 +139,9 @@ const scenarioReducer = (state: ScenarioState, action: ScenarioAction): Scenario
                 comparisonResult: null
             };
 
+        case 'CLEAR_ALL_SCENARIOS':
+            return initialScenarioState;
+
         default:
             return state;
     }
@@ -178,6 +181,7 @@ interface ScenarioContextProps {
         currentTaxState: TaxState
     ) => Promise<void>;
     clearComparison: () => void;
+    clearAllScenarios: () => void;
 }
 
 // ============================================================================
@@ -187,16 +191,17 @@ interface ScenarioContextProps {
 export const ScenarioContext = createContext<ScenarioContextProps>({
     state: initialScenarioState,
     dispatch: () => null,
-    saveCurrentAsScenario: () => {},
-    deleteScenario: () => {},
-    renameScenario: () => {},
-    updateScenarioAssumptions: () => {},
-    exportScenario: () => {},
-    importScenario: async () => {},
-    selectBaseline: () => {},
-    selectComparison: () => {},
-    runComparison: async () => {},
-    clearComparison: () => {}
+    saveCurrentAsScenario: () => { },
+    deleteScenario: () => { },
+    renameScenario: () => { },
+    updateScenarioAssumptions: () => { },
+    exportScenario: () => { },
+    importScenario: async () => { },
+    selectBaseline: () => { },
+    selectComparison: () => { },
+    runComparison: async () => { },
+    clearComparison: () => { },
+    clearAllScenarios: () => { }
 });
 
 // ============================================================================
@@ -501,6 +506,19 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: 'CLEAR_COMPARISON' });
     }, []);
 
+    /**
+     * Clear all scenarios from storage and state
+     */
+    const clearAllScenarios = useCallback(() => {
+        try {
+            localStorage.removeItem(SCENARIOS_STORAGE_KEY);
+            dispatch({ type: 'CLEAR_ALL_SCENARIOS' });
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Failed to clear scenarios';
+            dispatch({ type: 'SET_ERROR', payload: message });
+        }
+    }, []);
+
     // Memoize context value
     const contextValue = useMemo(() => ({
         state,
@@ -514,7 +532,8 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
         selectBaseline,
         selectComparison,
         runComparison,
-        clearComparison
+        clearComparison,
+        clearAllScenarios
     }), [
         state,
         saveCurrentAsScenario,
@@ -526,7 +545,8 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
         selectBaseline,
         selectComparison,
         runComparison,
-        clearComparison
+        clearComparison,
+        clearAllScenarios
     ]);
 
     return (
@@ -563,7 +583,7 @@ export const useScenariosList = () => {
  * Hook to get comparison state
  */
 export const useScenarioComparison = () => {
-    const { state, selectBaseline, selectComparison, runComparison, clearComparison } = useScenarios();
+    const { state, selectBaseline, selectComparison, runComparison, clearComparison, clearAllScenarios } = useScenarios();
     return {
         selectedBaseline: state.selectedBaseline,
         selectedComparison: state.selectedComparison,
@@ -573,6 +593,7 @@ export const useScenarioComparison = () => {
         selectBaseline,
         selectComparison,
         runComparison,
-        clearComparison
+        clearComparison,
+        clearAllScenarios
     };
 };
